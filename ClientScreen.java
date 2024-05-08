@@ -24,11 +24,18 @@ import java.net.*;
 public class ClientScreen extends JPanel implements ActionListener {
     private PrintWriter out;
     private BufferedImage background;
+    private DLList<Card> myHand;
 
+    private Color Yellow = new Color(255, 225, 0);
+    private Color Blue = new Color(0, 76, 255);
+    private Color Red = new Color(255, 4, 0);
+    private Color Green = new Color(72, 255, 0);
+    private Color Black = new Color(0, 0, 0);
 
     public ClientScreen() {
         setLayout(null);
 
+        myHand = new DLList<Card>();
         try {
 			background = ImageIO.read(new File("Background.png"));
 		} catch (IOException event) {
@@ -42,6 +49,20 @@ public class ClientScreen extends JPanel implements ActionListener {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         g.drawImage(background, 0, 0, null);
+
+        for (int i = 0; i<myHand.size();i++) {
+            if(myHand.get(i).getColor().equals("Yellow")) {
+                g.setColor(Yellow);
+            } else if(myHand.get(i).getColor().equals("Blue")) {
+                g.setColor(Blue);
+            } else if(myHand.get(i).getColor().equals("Red")) {
+                g.setColor(Red);
+            } else if(myHand.get(i).getColor().equals("Green")) {
+                g.setColor(Green);
+            } else if(myHand.get(i).getColor().equals("Black")) {
+                g.setColor(Black);
+            }
+        }
     }
 
     public void actionPerformed(ActionEvent e) {
