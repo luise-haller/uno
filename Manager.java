@@ -16,6 +16,16 @@ public class Manager {
         if (threads.size() >= 3 || threads.size() <= 4) {
             //Turn Regulation Code Goes Here
             //Use dealHand() method from Game.java which takes the top 7 cards from the shuffled deck
+            broadcast("Starting the Game!");
+
+            // Deal hands to players
+            for (int i = 0; i < threads.size(); i++) {
+                ServerThread thread = threads.get(i);
+                DLList<Card> hand = game.dealHand();
+                thread.send("Your hand: " + hand.toString()); 
+            }
+        } else {
+            System.out.println("Game requires 3 to 4 players to start.");
         }
     }
 
