@@ -1,6 +1,6 @@
 public class Manager {
     private Game game;
-
+    
     private MyArrayList<ServerThread> threads;
     
     public Manager() {
@@ -23,7 +23,11 @@ public class Manager {
     }
 
     public void startGame() {
-        if (threads.size() >= 3 || threads.size() <= 4) {
+        System.out.println("Game started");
+        System.out.println("Thread size = " + threads.size());
+        // later fix: max of 4 players
+        if (threads.size() >= 3) {
+            System.out.println("More than 2 players");
             //Turn Regulation Code Goes Here
             //Use dealHand() method from Game.java which takes the top 7 cards from the shuffled deck
             broadcast("Starting the Game!");
@@ -32,7 +36,9 @@ public class Manager {
             for (int i = 0; i < threads.size(); i++) {
                 ServerThread thread = threads.get(i);
                 DLList<Card> hand = game.dealHand();
+
                 thread.send("Your hand: " + hand.toString()); 
+                System.out.println("sending hand");
             }
         } else {
             System.out.println("Game requires 3 to 4 players to start.");

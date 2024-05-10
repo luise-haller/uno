@@ -97,6 +97,7 @@ public class ClientScreen extends JPanel implements ActionListener {
 
             while(true) {
                 String msg = in.readLine();
+                System.out.println(msg);
                 // Check if it's the client's turn
                 if (msg.equals("Your turn")) {
                     myTurn = true;
@@ -111,20 +112,7 @@ public class ClientScreen extends JPanel implements ActionListener {
 			System.exit(1);
 		}
 
-        // listens for inputs
-        // try {
-            
-        //     while (true) {
-                
-        //         repaint();
-        //     }
-        // } catch (UnknownHostException e) {
-        //     System.err.println("Host unkown: " + hostName);
-        //     System.exit(1);
-        // } catch (IOException e) {
-        //     System.err.println("Couldn't get I/O for the connection to " + hostName);
-        //     System.exit(1);
-        // }
+       
     }
 
 }
