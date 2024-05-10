@@ -12,6 +12,7 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JTextArea;
 import java.util.LinkedList;
+import java.util.Scanner;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -22,7 +23,9 @@ import java.net.*;
 
 
 public class ClientScreen extends JPanel implements ActionListener {
+    private BufferedReader in;
     private PrintWriter out;
+
     private BufferedImage background;
     private DLList<Card> myHand;
 
@@ -34,6 +37,7 @@ public class ClientScreen extends JPanel implements ActionListener {
 
     public ClientScreen() {
         setLayout(null);
+        this.setFocusable(true);
 
         myHand = new DLList<Card>();
         try {
@@ -70,14 +74,32 @@ public class ClientScreen extends JPanel implements ActionListener {
     }
 
     public void connect() throws IOException {
-        String hostName = "localHost";
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter ip address: ");
+        String hostName = sc.nextLine();
         int portNumber = 1024;
+
+        System.out.print("Enter username (no spaces): ");
+        String username = sc.next();
+
         Socket serverSocket = new Socket(hostName, portNumber);
-
-        BufferedReader in = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
         out = new PrintWriter(serverSocket.getOutputStream(), true);
+        in = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
 
-        
+        try {
+            out.println(username);
+
+            while(true) {
+                String msg = in.readLine();
+                // add stuff
+                
+                repaint();
+            }
+        } catch(IOException e) {
+			System.err.println("Couldn't get I/O for the connection");
+			System.exit(1);
+		}
 
         // listens for inputs
         // try {
