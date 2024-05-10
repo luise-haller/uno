@@ -42,7 +42,10 @@ public class ServerThread implements Runnable {
                 if (msg.equals("play")) {
                     manager.startGame();
                 }
-                
+                // Send "Your turn" message to the first client that joins
+                if (manager.isFirstClient(this)) {
+                    send("Your turn");
+                }
             }
 
             out.flush();

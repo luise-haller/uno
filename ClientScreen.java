@@ -29,6 +29,8 @@ public class ClientScreen extends JPanel implements ActionListener {
     private BufferedImage background;
     private DLList<Card> myHand;
 
+    private boolean myTurn;
+
     private Color Yellow = new Color(255, 225, 0);
     private Color Blue = new Color(0, 76, 255);
     private Color Red = new Color(255, 4, 0);
@@ -40,6 +42,9 @@ public class ClientScreen extends JPanel implements ActionListener {
         this.setFocusable(true);
 
         myHand = new DLList<Card>();
+
+        myTurn = false;
+
         try {
 			background = ImageIO.read(new File("Background.png"));
 		} catch (IOException event) {
@@ -92,8 +97,13 @@ public class ClientScreen extends JPanel implements ActionListener {
 
             while(true) {
                 String msg = in.readLine();
-                // add stuff
-                
+                // Check if it's the client's turn
+                if (msg.equals("Your turn")) {
+                    myTurn = true;
+                } else {
+                    myTurn = false;
+                }
+                // add other messages (if needed)
                 repaint();
             }
         } catch(IOException e) {

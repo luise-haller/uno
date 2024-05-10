@@ -12,6 +12,16 @@ public class Manager {
         threads.add(st);
     }
 
+    // Hopefully checks if a given ServerThread instance is the first client
+    public boolean isFirstClient(ServerThread st) {
+        for (int i = 0; i < threads.size(); i++) {
+            if (threads.get(i) == st) {
+                return i == 0;
+            }
+        }
+        return false;
+    }
+
     public void startGame() {
         if (threads.size() >= 3 || threads.size() <= 4) {
             //Turn Regulation Code Goes Here
