@@ -23,7 +23,6 @@ public class Manager {
     }
 
     public void startGame() {
-        System.out.println("Game started");
         System.out.println("Thread size = " + threads.size());
         // later fix: max of 4 players
         if (threads.size() >= 3) {

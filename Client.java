@@ -14,6 +14,17 @@ public class Client {
         frame.pack();
         frame.setVisible(true);
 
-        sc.connect();
+        while (true) {
+
+            boolean gameStarted = sc.getGameStarted();
+            if (gameStarted) {
+                sc.connect();
+            }
+            try { // To avoid high CPU usage
+                Thread.sleep(1000); 
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
