@@ -156,6 +156,8 @@ public class ClientScreen extends JPanel implements ActionListener {
             while(true) {
                 String msg = in.readLine();
                 // System.out.println(msg);
+                myHand = transformHand(msg);
+                System.out.println(myHand);
                 // Check if it's the client's turn
                 if (msg.equals("Your turn")) {
                     myTurn = true;
@@ -170,6 +172,17 @@ public class ClientScreen extends JPanel implements ActionListener {
             System.exit(1);
         }
        
+    }
+    private DLList<Card> transformHand(String s) {
+        String[] array = s.split(",");
+        DLList<Card> hand = new DLList<Card>();
+        for (int i = 0; i< array.length; i++) {
+            String[] split = array[i].split(" ");
+            String color = split[0];
+            String value = split[1];
+            hand.add(new Card(color, value));
+        }
+        return hand;
     }
 
 }

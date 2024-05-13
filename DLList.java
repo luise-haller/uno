@@ -88,7 +88,7 @@ public class DLList<E>{
 			allElements = allElements + current.get();
 			
 			if (!current.next().equals(tail)){
-				allElements = allElements + "\n";
+				allElements = allElements + ",";
 			}
 			
 			current = current.next();

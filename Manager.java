@@ -25,8 +25,8 @@ public class Manager {
     public void startGame() {
         System.out.println("Thread size = " + threads.size());
         // later fix: max of 4 players
-        if (threads.size() >= 3) {
-            System.out.println("More than 2 players");
+        if (threads.size() >= 1) {
+            // System.out.println("More than 2 players");
             //Turn Regulation Code Goes Here
             //Use dealHand() method from Game.java which takes the top 7 cards from the shuffled deck
             broadcast("Starting the Game!");

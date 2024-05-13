@@ -28,19 +28,20 @@ public class ServerThread implements Runnable {
 
     public void run() {
         System.out.println(Thread.currentThread().getName() + ": connection opened.");
+        
 
         try {
             out = new PrintWriter(clientSocket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
+        
             username = in.readLine();
             // manager.startGame();
             System.out.println("username: " + username.toString());
             System.out.println(clientSocket.getInputStream());
-            
+            manager.startGame();
             while (clientSocket.getInputStream() != null) {
                 // Shouldn't read in other player's cards since player can only see gray boxes??
-                System.out.println("past while loop");
+                // System.out.println("past while loop");
                 String msg = in.readLine();
                 System.out.println(msg);
                 // System.out.println("past while loo");
@@ -48,7 +49,7 @@ public class ServerThread implements Runnable {
                 // if (msg.equals("play")) {
                     
                 // }
-                manager.startGame();
+                
 
                 // Send "Your turn" message to the first client that joins
                 if (manager.isFirstClient(this)) {
