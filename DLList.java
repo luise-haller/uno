@@ -61,8 +61,22 @@ public class DLList<E>{
 			current = current.next();
 		}
 	}
+	public DLList<E> subList(int fromIndex, int toIndex) {
+		if (fromIndex < 0 || toIndex > size || fromIndex > toIndex) {
+			throw new IndexOutOfBoundsException();
+		}
 	
-	public void remove(int location){
+		DLList<E> subList = new DLList<E>();
+		Node<E> current = getNode(fromIndex);
+	
+		for (int i = fromIndex; i < toIndex; i++) {
+			subList.add(current.get());
+			current = current.next();
+		}
+	
+		return subList;
+	}
+	public E remove(int location){
 		Node<E> current = head.next();
 		
 		for (int i = 0; i < size; i++){
@@ -73,10 +87,12 @@ public class DLList<E>{
 				before.setNext(after);
 				after.setPrev(before);
 				size--;
+				return current.get();
 			}
 		
 			current = current.next();
 		}
+		return null;
 	}
 	
 	public String toString(){

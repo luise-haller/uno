@@ -95,6 +95,8 @@ public class ClientScreen extends JPanel implements ActionListener {
         g.setColor(Color.WHITE);
 
         if (gameStarted) {
+            g.setColor(Color.gray);
+            g.fillRect(200, 200, 50, 140);
             for (int i = 0; i<myHand.size();i++) {
                 if(myHand.get(i).getColor().equals("Yellow")) {
                     g.setColor(Yellow);
@@ -108,14 +110,15 @@ public class ClientScreen extends JPanel implements ActionListener {
                     g.setColor(Black);
                 }
             }    
-        }
-        if (!startGameButton.isVisible()) {
-            g.drawString("IP address of server:", 220, 300);
-            g.drawString("Your Player Name ", 220, 350);
         } else {
-            int scaledWidth = (int) (logo.getWidth() * 0.2); 
-            int scaledHeight = (int) (logo.getHeight() * 0.2);
-            g.drawImage(logo, 250, 100, scaledWidth, scaledHeight, null);
+            if (!startGameButton.isVisible()) {
+                g.drawString("IP address of server:", 220, 300);
+                g.drawString("Your Player Name ", 220, 350);
+            } else {
+                int scaledWidth = (int) (logo.getWidth() * 0.2); 
+                int scaledHeight = (int) (logo.getHeight() * 0.2);
+                g.drawImage(logo, 250, 100, scaledWidth, scaledHeight, null);
+            }
         }
     }
 
@@ -155,9 +158,11 @@ public class ClientScreen extends JPanel implements ActionListener {
 
             while(true) {
                 String msg = in.readLine();
-                // System.out.println(msg);
                 myHand = transformHand(msg);
                 System.out.println(myHand);
+
+                
+
                 // Check if it's the client's turn
                 if (msg.equals("Your turn")) {
                     myTurn = true;

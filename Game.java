@@ -12,11 +12,18 @@ public class Game {
     public DLList<Card> dealHand() {
         DLList<Card> hand = new DLList<Card>();
         for (int i = 0; i<7;i++) {
-            hand.add(deck.get(i));
+            Card card = deck.remove(0);
+            hand.add(card);
         }
         return hand;
     }
-
+    public DLList<Card> getDeckPile() {
+        return deck;
+    }
+    public DLList<Card> getDrawPile() {
+        // sublist excluding the top card
+        return deck.subList(1, deck.size());
+    }
     public void cardBox() { /* Makes Deck with 112 Cards */
         //Red 0 - 9
         deck.add(new Card("Red", "0"));

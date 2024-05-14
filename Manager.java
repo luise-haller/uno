@@ -39,6 +39,10 @@ public class Manager {
                 thread.send("Your hand: " + hand.toString()); 
                 System.out.println("sending hand");
             }
+
+            DLList<Card> deck = game.getDrawPile();
+            Card topCard = deck.get(0);
+            broadcast("Top Card: " + topCard.toString());
         } else {
             System.out.println("Game requires 3 to 4 players to start.");
         }
