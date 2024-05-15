@@ -41,14 +41,9 @@ public class ServerThread implements Runnable {
             manager.startGame();
             while (clientSocket.getInputStream() != null) {
                 // Shouldn't read in other player's cards since player can only see gray boxes??
-                // System.out.println("past while loop");
                 String msg = in.readLine();
                 System.out.println(msg);
-                // System.out.println("past while loo");
-
-                // if (msg.equals("play")) {
-                    
-                // }
+                
                 
 
                 // Send "Your turn" message to the first client that joins

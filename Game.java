@@ -24,6 +24,9 @@ public class Game {
         // sublist excluding the top card
         return deck.subList(1, deck.size());
     }
+    public DLList<Card> getTopCard() {
+        return deck.subList(0, 1);
+    }
     public void cardBox() { /* Makes Deck with 112 Cards */
         //Red 0 - 9
         deck.add(new Card("Red", "0"));
@@ -49,10 +52,10 @@ public class Game {
         //Red 6 Action Cards
         deck.add(new Card("Red", "Reverse"));
         deck.add(new Card("Red", "Skip"));
-        deck.add(new Card("Red", "Draw 2"));
+        deck.add(new Card("Red", "DrawTwo"));
         deck.add(new Card("Red", "Reverse"));
         deck.add(new Card("Red", "Skip"));
-        deck.add(new Card("Red", "Draw 2"));
+        deck.add(new Card("Red", "DrawTwo"));
 
         //Green 0-9
         deck.add(new Card("Green", "0"));
@@ -78,10 +81,10 @@ public class Game {
         //Green 6 Action Cards
         deck.add(new Card("Red", "Reverse"));
         deck.add(new Card("Red", "Skip"));
-        deck.add(new Card("Red", "Draw 2"));
+        deck.add(new Card("Red", "DrawTwo"));
         deck.add(new Card("Red", "Reverse"));
         deck.add(new Card("Red", "Skip"));
-        deck.add(new Card("Red", "Draw 2"));
+        deck.add(new Card("Red", "DrawTwo"));
 
         //Blue 0 - 9
         deck.add(new Card("Blue", "0"));
@@ -107,10 +110,10 @@ public class Game {
         //Green 6 Action Cards
         deck.add(new Card("Blue", "Reverse"));
         deck.add(new Card("Blue", "Skip"));
-        deck.add(new Card("Blue", "Draw 2"));
+        deck.add(new Card("Blue", "DrawTwo"));
         deck.add(new Card("Blue", "Reverse"));
         deck.add(new Card("Blue", "Skip"));
-        deck.add(new Card("Blue", "Draw 2"));
+        deck.add(new Card("Blue", "DrawTwo"));
 
         //Yellow 0 - 9 
         deck.add(new Card("Yellow", "0"));
@@ -136,20 +139,20 @@ public class Game {
         //Yellow 6 Action Cards
         deck.add(new Card("Yellow", "Reverse"));
         deck.add(new Card("Yellow", "Skip"));
-        deck.add(new Card("Yellow", "Draw 2"));
+        deck.add(new Card("Yellow", "DrawTwo"));
         deck.add(new Card("Yellow", "Reverse"));
         deck.add(new Card("Yellow", "Skip"));
-        deck.add(new Card("Yellow", "Draw 2"));
+        deck.add(new Card("Yellow", "DrawTwo"));
 
         //8 Wild Cards
-        deck.add(new Card("Black", "Draw 4 Wild"));
-        deck.add(new Card("Black", "Draw 4 Wild"));
-        deck.add(new Card("Black", "Draw 4 Wild"));
-        deck.add(new Card("Black", "Draw 4 Wild"));
-        deck.add(new Card("Black", "Wild Card"));
-        deck.add(new Card("Black", "Wild Card"));
-        deck.add(new Card("Black", "Wild Card"));
-        deck.add(new Card("Black", "Wild Card"));
+        deck.add(new Card("Black", "DrawFourWild"));
+        deck.add(new Card("Black", "DrawFourWild"));
+        deck.add(new Card("Black", "DrawFourWild"));
+        deck.add(new Card("Black", "DrawFourWild"));
+        deck.add(new Card("Black", "WildCard"));
+        deck.add(new Card("Black", "WildCard"));
+        deck.add(new Card("Black", "WildCard"));
+        deck.add(new Card("Black", "WildCard"));
 
     }
 

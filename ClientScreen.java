@@ -27,7 +27,8 @@ public class ClientScreen extends JPanel implements ActionListener {
     private PrintWriter out;
 
     private BufferedImage background, logo;
-    private DLList<Card> myHand;
+    private DLList<Card> myHand, deck;
+    private Card cardInPlay;
 
     private boolean myTurn, gameStarted;
     private String hostName, username;
@@ -46,6 +47,8 @@ public class ClientScreen extends JPanel implements ActionListener {
         this.setFocusable(true);
 
         myHand = new DLList<Card>();
+        deck = new DLList<Card>();
+        cardInPlay = null;
 
         myTurn = false;
         gameStarted = false;
@@ -92,24 +95,19 @@ public class ClientScreen extends JPanel implements ActionListener {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         g.drawImage(background, 0, 0, null);
-        g.setColor(Color.WHITE);
+
 
         if (gameStarted) {
-            g.setColor(Color.gray);
-            g.fillRect(200, 200, 50, 140);
-            for (int i = 0; i<myHand.size();i++) {
-                if(myHand.get(i).getColor().equals("Yellow")) {
-                    g.setColor(Yellow);
-                } else if(myHand.get(i).getColor().equals("Blue")) {
-                    g.setColor(Blue);
-                } else if(myHand.get(i).getColor().equals("Red")) {
-                    g.setColor(Red);
-                } else if(myHand.get(i).getColor().equals("Green")) {
-                    g.setColor(Green);
-                } else if(myHand.get(i).getColor().equals("Black")) {
-                    g.setColor(Black);
-                }
-            }    
+            if (cardInPlay != null) {
+                g.setColor(Color.BLACK);
+            g.drawString("Draw Pile", 500, 300);
+            System.out.println("Card in Play " + cardInPlay.toString());
+            
+            drawCard(g, cardInPlay, 200, 300);
+            }
+            
+
+        
         } else {
             if (!startGameButton.isVisible()) {
                 g.drawString("IP address of server:", 220, 300);
@@ -117,7 +115,7 @@ public class ClientScreen extends JPanel implements ActionListener {
             } else {
                 int scaledWidth = (int) (logo.getWidth() * 0.2); 
                 int scaledHeight = (int) (logo.getHeight() * 0.2);
-                g.drawImage(logo, 250, 100, scaledWidth, scaledHeight, null);
+                g.drawImage(logo, 270, 100, scaledWidth, scaledHeight, null);
             }
         }
     }
@@ -147,7 +145,6 @@ public class ClientScreen extends JPanel implements ActionListener {
 
         // When client clicks play, they are asked to enter id address of server & their player name
         // Then will be connected & "enter" the game
-        // System.out.println("Connecting");
         int portNumber = 1024;
         Socket serverSocket = new Socket(hostName, portNumber);
         out = new PrintWriter(serverSocket.getOutputStream(), true);
@@ -157,18 +154,27 @@ public class ClientScreen extends JPanel implements ActionListener {
             out.println(username);
 
             while(true) {
+                
                 String msg = in.readLine();
                 myHand = transformHand(msg);
                 System.out.println(myHand);
-
                 
-
                 // Check if it's the client's turn
                 if (msg.equals("Your turn")) {
                     myTurn = true;
                 } else {
                     myTurn = false;
                 }
+                System.out.println("Turn? " + myTurn);
+                
+                String msg2 = in.readLine();
+                System.out.println("msg from in.readLine = " + msg2);
+                // System.out.println("New Top card: " + transformCard(msg2));
+                cardInPlay = transformCard(msg2);
+                
+                
+
+                
                 // add other messages (if needed)
                 repaint();
             }
@@ -189,5 +195,35 @@ public class ClientScreen extends JPanel implements ActionListener {
         }
         return hand;
     }
+
+    private Card transformCard(String s) {
+        String nS = s.substring(1, s.length()-1);
+        String[] array = nS.split(" ");
+        Card card = new Card(array[0], array[1]);
+        return card;
+    }
+    
+    
+    private void drawCard(Graphics g, Card card, int x, int y) {
+        //take in the value and color of the card
+        //draws card graphically
+        System.out.println(card.toString());
+        if(card.getColor().equals("Yellow")) {
+            g.setColor(Yellow);
+        } else if(card.getColor().equals("Blue")) {
+            g.setColor(Blue);
+        } else if(card.getColor().equals("Red")) {
+            g.setColor(Red);
+        } else if(card.getColor().equals("Green")) {
+            g.setColor(Green);
+        } else if(card.getColor().equals("Black")) {
+            g.setColor(Black);
+        }
+        g.fillRect(x, y, 120, 200);
+        g.setColor(Color.BLACK);
+        g.drawString(card.getValue() + "", x+55, y+95);
+    }
+
+
 
 }
