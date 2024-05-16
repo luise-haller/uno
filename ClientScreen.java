@@ -1,7 +1,4 @@
 import javax.swing.JPanel;
-import java.awt.Graphics;
-import java.awt.Color;
-import java.awt.Dimension;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.JTextArea;
@@ -98,15 +95,34 @@ public class ClientScreen extends JPanel implements ActionListener {
 
 
         if (gameStarted) {
+            submitButton.setVisible(false);
+            ipAddressField.setVisible(false);
+            usernameField.setVisible(false);
             if (cardInPlay != null) {
                 g.setColor(Color.BLACK);
-            g.drawString("Draw Pile", 500, 300);
-            System.out.println("Card in Play " + cardInPlay.toString());
-            
-            drawCard(g, cardInPlay, 200, 300);
-            }
-            
+                g.fillRect(450, 100, 100, 150);
+                
+                g.setColor(Color.WHITE);
+                g.drawString("Draw Pile", 480, 280);
+                g.drawString("Play Pile", 300, 280);
+                g.drawRect(450, 100, 100, 150);
+                g.drawImage(logo, 465, 130, 70, 70, null);
+                drawCard(g, cardInPlay, 270, 100);
+                g.drawImage(logo, 285, 130, 70, 70, null);
+                
 
+                
+                
+
+                if(myHand.size() > 0) {
+                    System.out.println("Hand: \n" + myHand.toString());
+                    // System.out.println("Hand to be displayed " + myHand.size());
+                    // for(int i = 0; i < myHand.size(); i++) {
+                    //     System.out.println(myHand.get(i).toString());
+                    //     drawCard(g, myHand.get(i), 100 + i*100, 400);
+                    // }
+                }
+            }
         
         } else {
             if (!startGameButton.isVisible()) {
@@ -207,7 +223,7 @@ public class ClientScreen extends JPanel implements ActionListener {
     private void drawCard(Graphics g, Card card, int x, int y) {
         //take in the value and color of the card
         //draws card graphically
-        System.out.println(card.toString());
+        // System.out.println(card.toString());
         if(card.getColor().equals("Yellow")) {
             g.setColor(Yellow);
         } else if(card.getColor().equals("Blue")) {
@@ -219,9 +235,31 @@ public class ClientScreen extends JPanel implements ActionListener {
         } else if(card.getColor().equals("Black")) {
             g.setColor(Black);
         }
-        g.fillRect(x, y, 120, 200);
-        g.setColor(Color.BLACK);
-        g.drawString(card.getValue() + "", x+55, y+95);
+        g.fillRect(x, y, 100, 150);
+        g.setColor(Color.WHITE);
+        if(!card.getValue().equals("DrawTwo") || !card.getValue().equals("Skip") || !card.getValue().equals("Reverse") || !card.getValue().equals("WildCard") || !card.getValue().equals("DrawFourWild")) {
+            g.setFont(new Font("Arial", Font.BOLD, 25));
+            g.drawString(card.getValue() + "", x+5, y+20);
+            g.drawString(card.getValue() + "", x+80, y+140);
+        } else if(card.getValue().equals("DrawTwo")) {
+            g.setFont(new Font("Arial", Font.BOLD, 25));
+            g.drawString("+2", x+20, y+75);
+        } else if(card.getValue().equals("Skip")) {
+            g.setFont(new Font("Arial", Font.BOLD, 20));
+            g.drawString("Skip", x+20, y+75);
+        } else if(card.getValue().equals("Reverse")) {
+            g.setFont(new Font("Arial", Font.BOLD, 20));
+            g.drawString("Reverse", x+20, y+75);
+        } else if(card.getValue().equals("DrawFourWild")) {
+            g.setFont(new Font("Arial", Font.BOLD, 25));
+            g.drawString("4+", x+20, y+75);
+        } else if(card.getValue().equals("WildCard")) {
+            g.setFont(new Font("Arial", Font.BOLD, 20));
+            g.drawString("Wild Card!", x+20, y+75);
+        }
+        
+        
+        g.drawRect(x, y, 100, 150);
     }
 
 
