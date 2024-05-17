@@ -32,8 +32,8 @@ public class Manager {
             for (int i = 0; i < threads.size(); i++) {
                 ServerThread thread = threads.get(i);
                 DLList<Card> hand = game.dealHand();
-
-                thread.send("Your hand: " + hand.toString()); 
+                // System.out.println("Manager: " + hand.toString());
+                thread.send(hand.toString()); 
                 
             }
 
