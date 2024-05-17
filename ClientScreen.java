@@ -13,19 +13,22 @@ import java.util.Scanner;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseEvent;
 
 import java.io.*;
 import java.net.*;
 import java.awt.*;
 
 
-public class ClientScreen extends JPanel implements ActionListener {
+public class ClientScreen extends JPanel implements ActionListener, MouseListener {
     private BufferedReader in;
     private PrintWriter out;
 
     private BufferedImage background, logo;
     private DLList<Card> myHand, deck;
     private Card cardInPlay;
+    private Card cardSelected;
 
     private boolean myTurn, gameStarted;
     private String hostName, username;
@@ -45,7 +48,7 @@ public class ClientScreen extends JPanel implements ActionListener {
 
         myHand = new DLList<Card>();
         deck = new DLList<Card>();
-        cardInPlay = null;
+        cardInPlay = null; cardSelected = null;
 
         myTurn = false;
         gameStarted = false;
@@ -260,6 +263,31 @@ public class ClientScreen extends JPanel implements ActionListener {
         g.drawRect(x, y, 100, 150);
         g.drawImage(logo, x+15, y+30, 70, 70, null);
     }
+
+    public void mousePressed(MouseEvent e) {
+        // DLList<Location> keys = graph.keys().toDLList();
+        // for (int i = 0; i<keys.size();i++) {
+        //     if((Math.abs(keys.get(i).getX() - e.getX())) <= 10 && (Math.abs(keys.get(i).getY() - e.getY())) <= 10) {
+        //         locationBeingViewed = keys.get(i);
+        //         break;
+        //     } else {
+        //         locationBeingViewed = null;
+        //     }
+        // }
+
+        // repaint();
+        // for(int i = 0; i<myHand.size(); i++) {
+        //     if (Math.abs(myHand.get(i).))
+        // }
+
+    }
+
+    
+
+    public void mouseReleased(MouseEvent e) {}
+    public void mouseEntered(MouseEvent e) {}
+    public void mouseExited(MouseEvent e) {}
+    public void mouseClicked(MouseEvent e) {}
 
 
 
