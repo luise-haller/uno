@@ -24,7 +24,7 @@ public class Card {
     }
     @Override
     public String toString() {
-        return "[" + color + " " + value + "]";
+        return color + " " + value;
     }
 }
 class ActionCard extends Card {
