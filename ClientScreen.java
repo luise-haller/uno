@@ -108,19 +108,14 @@ public class ClientScreen extends JPanel implements ActionListener {
                 g.drawRect(450, 100, 100, 150);
                 g.drawImage(logo, 465, 130, 70, 70, null);
                 drawCard(g, cardInPlay, 270, 100);
-                g.drawImage(logo, 285, 130, 70, 70, null);
-                
 
-                
-                
-
-                if(myHand.size() > 0) {
-                    System.out.println("Hand: \n" + myHand.toString());
-                    // System.out.println("Hand to be displayed " + myHand.size());
-                    // for(int i = 0; i < myHand.size(); i++) {
-                    //     System.out.println(myHand.get(i).toString());
-                    //     drawCard(g, myHand.get(i), 100 + i*100, 400);
-                    // }
+            
+                // System.out.println("First Card in my hand: " + myHand.get(0).toString());
+                // drawCard(g, myHand.get(0), 100, 500);
+                if(myHand.size() >= 0) {
+                    for (int i = 0; i<myHand.size();i++) {
+                        drawCard(g, myHand.get(i), 100 + i*75, 400);
+                    }
                 }
             }
         
@@ -173,7 +168,7 @@ public class ClientScreen extends JPanel implements ActionListener {
                 
                 String msg = in.readLine();
                 myHand = transformHand(msg);
-                System.out.println(myHand);
+                // System.out.println(myHand);
                 
                 // Check if it's the client's turn
                 if (msg.equals("Your turn")) {
@@ -201,6 +196,7 @@ public class ClientScreen extends JPanel implements ActionListener {
        
     }
     private DLList<Card> transformHand(String s) {
+        System.out.println(s);
         String[] array = s.split(",");
         DLList<Card> hand = new DLList<Card>();
         for (int i = 0; i< array.length; i++) {
@@ -213,9 +209,12 @@ public class ClientScreen extends JPanel implements ActionListener {
     }
 
     private Card transformCard(String s) {
-        String nS = s.substring(1, s.length()-1);
-        String[] array = nS.split(" ");
-        Card card = new Card(array[0], array[1]);
+        String[] nS = s.split(" ");
+        String color = nS[0];
+        String value = nS[1];
+        // String nS = s.substring(1, s.length()-1);
+        // String[] array = nS.split(" ");
+        Card card = new Card(color, value);
         return card;
     }
     
@@ -237,29 +236,29 @@ public class ClientScreen extends JPanel implements ActionListener {
         }
         g.fillRect(x, y, 100, 150);
         g.setColor(Color.WHITE);
-        if(!card.getValue().equals("DrawTwo") || !card.getValue().equals("Skip") || !card.getValue().equals("Reverse") || !card.getValue().equals("WildCard") || !card.getValue().equals("DrawFourWild")) {
+        if(card.getValue().equals("DrawTwo")) {
+            g.setFont(new Font("Arial", Font.BOLD, 25));
+            g.drawString("+2", x+5, y+20);
+        } else if(card.getValue().equals("Skip")) {
+            g.setFont(new Font("Arial", Font.BOLD, 20));
+            g.drawString("Skip",  x+5, y+20);
+        } else if(card.getValue().equals("Reverse")) {
+            g.setFont(new Font("Arial", Font.BOLD, 20));
+            g.drawString("Reverse",  x+5, y+20);
+        } else if(card.getValue().equals("DrawFourWild")) {
+            g.setFont(new Font("Arial", Font.BOLD, 25));
+            g.drawString("4+",  x+5, y+20);
+        } else if(card.getValue().equals("WildCard")) {
+            g.setFont(new Font("Arial", Font.BOLD, 20));
+            g.drawString("Wild Card!",  x+5, y+20);
+        } else {
             g.setFont(new Font("Arial", Font.BOLD, 25));
             g.drawString(card.getValue() + "", x+5, y+20);
             g.drawString(card.getValue() + "", x+80, y+140);
-        } else if(card.getValue().equals("DrawTwo")) {
-            g.setFont(new Font("Arial", Font.BOLD, 25));
-            g.drawString("+2", x+20, y+75);
-        } else if(card.getValue().equals("Skip")) {
-            g.setFont(new Font("Arial", Font.BOLD, 20));
-            g.drawString("Skip", x+20, y+75);
-        } else if(card.getValue().equals("Reverse")) {
-            g.setFont(new Font("Arial", Font.BOLD, 20));
-            g.drawString("Reverse", x+20, y+75);
-        } else if(card.getValue().equals("DrawFourWild")) {
-            g.setFont(new Font("Arial", Font.BOLD, 25));
-            g.drawString("4+", x+20, y+75);
-        } else if(card.getValue().equals("WildCard")) {
-            g.setFont(new Font("Arial", Font.BOLD, 20));
-            g.drawString("Wild Card!", x+20, y+75);
         }
         
-        
         g.drawRect(x, y, 100, 150);
+        g.drawImage(logo, x+15, y+30, 70, 70, null);
     }
 
 
