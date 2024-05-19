@@ -13,19 +13,22 @@ import java.util.Scanner;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseEvent;
 
 import java.io.*;
 import java.net.*;
 import java.awt.*;
 
 
-public class ClientScreen extends JPanel implements ActionListener {
+public class ClientScreen extends JPanel implements ActionListener, MouseListener {
     private BufferedReader in;
     private PrintWriter out;
 
     private BufferedImage background, logo;
     private DLList<Card> myHand, deck;
     private Card cardInPlay;
+    private Card cardSelected;
 
     private boolean myTurn, gameStarted;
     private String hostName, username;
@@ -42,10 +45,11 @@ public class ClientScreen extends JPanel implements ActionListener {
     public ClientScreen() {
         setLayout(null);
         this.setFocusable(true);
+        addMouseListener(this);
 
         myHand = new DLList<Card>();
         deck = new DLList<Card>();
-        cardInPlay = null;
+        cardInPlay = null; cardSelected = null;
 
         myTurn = false;
         gameStarted = false;
@@ -114,7 +118,7 @@ public class ClientScreen extends JPanel implements ActionListener {
                 // drawCard(g, myHand.get(0), 100, 500);
                 if(myHand.size() >= 0) {
                     for (int i = 0; i<myHand.size();i++) {
-                        drawCard(g, myHand.get(i), 100 + i*75, 400);
+                        drawCard(g, myHand.get(i), 100 + i*55, 400);
                     }
                 }
             }
@@ -137,10 +141,12 @@ public class ClientScreen extends JPanel implements ActionListener {
             ipAddressField.setVisible(true);
             usernameField.setVisible(true);
             submitButton.setVisible(true);
-            this.hostName = ipAddressField.getText();
-            this.username = usernameField.getText();
+            // this.hostName = ipAddressField.getText();
+            // this.username = usernameField.getText();
         }
         else if (e.getSource() == submitButton) {
+            this.hostName = ipAddressField.getText();
+            this.username = usernameField.getText();
             gameStarted = true;
             // System.out.println("Submit button pressed. gameStarted = " + gameStarted);
             
@@ -157,6 +163,7 @@ public class ClientScreen extends JPanel implements ActionListener {
         // When client clicks play, they are asked to enter id address of server & their player name
         // Then will be connected & "enter" the game
         int portNumber = 1024;
+        System.out.println("host name" + hostName);
         Socket serverSocket = new Socket(hostName, portNumber);
         out = new PrintWriter(serverSocket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
@@ -182,6 +189,8 @@ public class ClientScreen extends JPanel implements ActionListener {
                 System.out.println("msg from in.readLine = " + msg2);
                 // System.out.println("New Top card: " + transformCard(msg2));
                 cardInPlay = transformCard(msg2);
+
+                System.out.println("Card in play: " + cardInPlay.toString());
                 
                 
 
@@ -261,6 +270,38 @@ public class ClientScreen extends JPanel implements ActionListener {
         g.drawImage(logo, x+15, y+30, 70, 70, null);
     }
 
+    public void mousePressed(MouseEvent e) {        
+        if(myHand.size() >= 0) {
+            for (int i = 0; i<myHand.size();i++) {
+                //drawCard(g, myHand.get(i), 100 + i*55, 400);
+                if (e.getY() > 400 && e.getY() < 550) {
+                    if (i == myHand.size()-1) {
+                        if (e.getX() >= 100 +i*55 && e.getX() < 100 + i*55) {
+                    
+                            // System.out.println("Card selected:" + i);
+                            System.out.println(myHand.get(i).toString());
+                            // this.cardSelected = myHand.get(i);
+                        }    
+                    } else {
+                        if (e.getX() >= 100 +i*55 && e.getX() < 155 + i*55) {
+                            // System.out.println("Card selected:" + i);
+                            System.out.println(myHand.get(i).toString());
+                            // this.cardSelected = myHand.get(i);
+                        }
+                    }
+                }
+            }
+            if (cardSelected != null) {
+                System.out.println("Card Selected = " + cardSelected.toString());
+            }
+        }
+    }
+    
+
+    public void mouseReleased(MouseEvent e) {}
+    public void mouseEntered(MouseEvent e) {}
+    public void mouseExited(MouseEvent e) {}
+    public void mouseClicked(MouseEvent e) {}
 
 
 }
