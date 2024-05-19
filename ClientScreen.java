@@ -26,7 +26,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     private PrintWriter out;
 
     private BufferedImage background, logo;
-    private DLList<Card> myHand, deck;
+    private DLList<Card> myHand;
     private Card cardInPlay;
     private Card cardSelected;
 
@@ -48,7 +48,6 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         addMouseListener(this);
 
         myHand = new DLList<Card>();
-        deck = new DLList<Card>();
         cardInPlay = null; cardSelected = null;
 
         myTurn = false;
@@ -276,27 +275,39 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
                 if (e.getY() > 400 && e.getY() < 550) {
                     int last = myHand.size()-1;
                     if (i == last) {
-                        if (e.getX() >= 100 +i*55 && e.getX() < 200 + i*55) {=
-                            System.out.println(myHand.get(i).toString());
+                        if (e.getX() >= 100 +i*55 && e.getX() < 200 + i*55) {
+                            cardSelected = myHand.get(i);
+                            // System.out.println(myHand.get(i).toString());
                         }    
                     } else {
                         if (e.getX() >= 100 +i*55 && e.getX() < 155 + i*55) {
-                            System.out.println(myHand.get(i).toString());
+                            cardSelected = myHand.get(i);
+                            // System.out.println(myHand.get(i).toString());
                         }
                     }
                 }
             }
             if (cardSelected != null) {
                 System.out.println("Card Selected = " + cardSelected.toString());
+                if (canPlayCard(cardSelected, cardInPlay)) {
+                    playCard(cardSelected);
+                }
             }
         }
     }
-    
+    private boolean canPlayCard(Card selected, Card inPlay) {
+        return selected.getColor().equals(inPlay.getColor()) || selected.getValue().equals(inPlay.getValue());
+    }
+    private void playCard(Card selected) {
+        this.cardInPlay = selected;
+        myHand.remove(selected);
+        cardSelected = null;
+        repaint();
+    }
 
     public void mouseReleased(MouseEvent e) {}
     public void mouseEntered(MouseEvent e) {}
     public void mouseExited(MouseEvent e) {}
     public void mouseClicked(MouseEvent e) {}
-
 
 }
