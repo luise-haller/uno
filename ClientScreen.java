@@ -271,22 +271,17 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     }
 
     public void mousePressed(MouseEvent e) {        
-        if(myHand.size() >= 0) {
+        if(myHand.size() >= 0) { // later add: if more than 20 hand cards, client automatically disconnected
             for (int i = 0; i<myHand.size();i++) {
-                //drawCard(g, myHand.get(i), 100 + i*55, 400);
                 if (e.getY() > 400 && e.getY() < 550) {
-                    if (i == myHand.size()-1) {
-                        if (e.getX() >= 100 +i*55 && e.getX() < 100 + i*55) {
-                    
-                            // System.out.println("Card selected:" + i);
+                    int last = myHand.size()-1;
+                    if (i == last) {
+                        if (e.getX() >= 100 +i*55 && e.getX() < 200 + i*55) {=
                             System.out.println(myHand.get(i).toString());
-                            // this.cardSelected = myHand.get(i);
                         }    
                     } else {
                         if (e.getX() >= 100 +i*55 && e.getX() < 155 + i*55) {
-                            // System.out.println("Card selected:" + i);
                             System.out.println(myHand.get(i).toString());
-                            // this.cardSelected = myHand.get(i);
                         }
                     }
                 }
