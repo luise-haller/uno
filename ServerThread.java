@@ -34,22 +34,27 @@ public class ServerThread implements Runnable {
             out = new PrintWriter(clientSocket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         
-            username = in.readLine();
-            // manager.startGame();
-            System.out.println("username: " + username.toString());
-            System.out.println(clientSocket.getInputStream());
+            String msg = in.readLine();
+            System.out.println("Msg received from client: " + msg);
+            if (msg.startsWith("Username")) {
+                username = msg.substring(8);
+                // System.out.println("Username = " + username.toString());
+                send("Username" + username.toString());
+            } else if (msg.startsWith("TurnEnded")) {
+                System.out.println("Hiya!"); // never prints
+            }
+        
             manager.startGame();
-            while (clientSocket.getInputStream() != null) {
-                // Shouldn't read in other player's cards since player can only see gray boxes??
-                String msg = in.readLine();
-                System.out.println(msg);
-                
-                
 
-                // Send "Your turn" message to the first client that joins
-                if (manager.isFirstClient(this)) {
-                    send("Your turn");
-                }
+            // System.out.println("test:" + manager.isFirstClient(this));
+            // // Send "Your turn" message to the first client that joins
+            if (manager.isFirstClient(this)) {
+                send("Your Turn");
+            }
+
+            while (clientSocket.getInputStream() != null) { 
+                String msg2 = in.readLine();
+                
             }
 
             out.flush();

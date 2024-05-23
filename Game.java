@@ -24,9 +24,6 @@ public class Game {
         // sublist excluding the top card
         return deck.subList(1, deck.size());
     }
-    public DLList<Card> getTopCard() {
-        return deck.subList(0, 1);
-    }
     public void cardBox() { /* Makes Deck with 112 Cards */
         //Red 0 - 9
         deck.add(new Card("Red", "0"));
@@ -79,12 +76,12 @@ public class Game {
         deck.add(new Card("Green", "9"));
         deck.add(new Card("Green", "9"));
         //Green 6 Action Cards
-        deck.add(new Card("Red", "Reverse"));
-        deck.add(new Card("Red", "Skip"));
-        deck.add(new Card("Red", "DrawTwo"));
-        deck.add(new Card("Red", "Reverse"));
-        deck.add(new Card("Red", "Skip"));
-        deck.add(new Card("Red", "DrawTwo"));
+        deck.add(new Card("Green", "Reverse"));
+        deck.add(new Card("Green", "Skip"));
+        deck.add(new Card("Green", "DrawTwo"));
+        deck.add(new Card("Green", "Reverse"));
+        deck.add(new Card("Green", "Skip"));
+        deck.add(new Card("Green", "DrawTwo"));
 
         //Blue 0 - 9
         deck.add(new Card("Blue", "0"));

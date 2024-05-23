@@ -30,8 +30,8 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     private Card cardInPlay;
     private Card cardSelected;
 
-    private boolean myTurn, gameStarted;
-    private String hostName, username;
+    private boolean myTurn, gameStarted, turnEnd;
+    private String hostName, username, playerName;
 
     private JButton startGameButton, submitButton;
     private JTextField ipAddressField, usernameField;
@@ -49,6 +49,8 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
 
         myHand = new DLList<Card>();
         cardInPlay = null; cardSelected = null;
+        playerName = null;
+        turnEnd = false;
 
         myTurn = false;
         gameStarted = false;
@@ -121,6 +123,9 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
                     }
                 }
             }
+            if (this.playerName != null) {
+                g.drawString("Player: " + this.playerName, 30, 30);
+            }
         
         } else {
             if (!startGameButton.isVisible()) {
@@ -140,15 +145,11 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             ipAddressField.setVisible(true);
             usernameField.setVisible(true);
             submitButton.setVisible(true);
-            // this.hostName = ipAddressField.getText();
-            // this.username = usernameField.getText();
         }
         else if (e.getSource() == submitButton) {
             this.hostName = ipAddressField.getText();
             this.username = usernameField.getText();
             gameStarted = true;
-            // System.out.println("Submit button pressed. gameStarted = " + gameStarted);
-            
         }
         repaint();
     }
@@ -162,39 +163,25 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         // When client clicks play, they are asked to enter id address of server & their player name
         // Then will be connected & "enter" the game
         int portNumber = 1024;
-        System.out.println("host name" + hostName);
+        // System.out.println("host name" + hostName);
         Socket serverSocket = new Socket(hostName, portNumber);
         out = new PrintWriter(serverSocket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
 
         try {
-            out.println(username);
-
+            out.println("Username" + username);
             while(true) {
+                if (turnEnd) {
+                    System.err.println("now writing..."); // this never prints since turnEnd never becomes true
+                    out.println("TurnEnded");
+                }
                 
                 String msg = in.readLine();
-                myHand = transformHand(msg);
-                // System.out.println(myHand);
-                
-                // Check if it's the client's turn
-                if (msg.equals("Your turn")) {
-                    myTurn = true;
-                } else {
-                    myTurn = false;
+                if (msg == null) {
+                    System.err.println("Received null message from server. Exiting...");
+                    break;
                 }
-                System.out.println("Turn? " + myTurn);
-                
-                String msg2 = in.readLine();
-                System.out.println("msg from in.readLine = " + msg2);
-                // System.out.println("New Top card: " + transformCard(msg2));
-                cardInPlay = transformCard(msg2);
-
-                System.out.println("Card in play: " + cardInPlay.toString());
-                
-                
-
-                
-                // add other messages (if needed)
+                processServerMessage(msg);
                 repaint();
             }
         } catch(IOException e) {
@@ -202,6 +189,21 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             System.exit(1);
         }
        
+    }
+    private void processServerMessage(String msg) {
+        if (msg.substring(0, 4).equals("Hand")) {
+            myHand = transformHand(msg.substring(4));
+        } else if (msg.substring(0, 3).equals("Top")) {
+            cardInPlay = transformCard(msg.substring(3));
+        } else if (msg.equals("Your Turn")) {
+            this.myTurn = true;
+        } else if (msg.startsWith("Username")) {
+            this.playerName = msg.substring(8);
+            // System.out.println("Player name = " + this.playerName);
+        }
+    
+        System.out.println("Turn Ended? " + turnEnd);
+        
     }
     private DLList<Card> transformHand(String s) {
         System.out.println(s);
@@ -277,31 +279,36 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
                     if (i == last) {
                         if (e.getX() >= 100 +i*55 && e.getX() < 200 + i*55) {
                             cardSelected = myHand.get(i);
-                            // System.out.println(myHand.get(i).toString());
                         }    
                     } else {
                         if (e.getX() >= 100 +i*55 && e.getX() < 155 + i*55) {
                             cardSelected = myHand.get(i);
-                            // System.out.println(myHand.get(i).toString());
                         }
                     }
                 }
             }
-            if (cardSelected != null) {
-                System.out.println("Card Selected = " + cardSelected.toString());
-                if (canPlayCard(cardSelected, cardInPlay)) {
-                    playCard(cardSelected);
-                }
+        }
+        // If clicked on draw pile
+        if (e.getX() >= 450 && e.getX() <= 550 && e.getY() >= 100 && e.getY() <= 250) {
+            
+        }
+        if (cardSelected != null) {
+            // System.out.println("Card Selected = " + cardSelected.toString());
+            if (this.myTurn && canPlayCard(cardSelected, cardInPlay)) {
+                playCardFromHand(cardSelected);
+                
             }
         }
     }
     private boolean canPlayCard(Card selected, Card inPlay) {
         return selected.getColor().equals(inPlay.getColor()) || selected.getValue().equals(inPlay.getValue());
     }
-    private void playCard(Card selected) {
+    private void playCardFromHand(Card selected) {
         this.cardInPlay = selected;
         myHand.remove(selected);
         cardSelected = null;
+        // System.out.println("turnEnd? " + turnEnd);
+        turnEnd = true; // why not updating in connect?????????
         repaint();
     }
 

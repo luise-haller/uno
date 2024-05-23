@@ -94,7 +94,9 @@ public class DLList<E>{
 		}
 		return null;
 	}
-	
+	public boolean isEmpty() {
+        return size == 0;
+    }
 	public String toString(){
 		String allElements = "";
 		
