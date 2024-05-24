@@ -30,7 +30,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     private Card cardInPlay;
     private Card cardSelected;
 
-    private boolean myTurn, gameStarted, turnEnd;
+    private boolean myTurn, gameStarted;
     private String hostName, username, playerName;
 
     private JButton startGameButton, submitButton;
@@ -50,7 +50,6 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         myHand = new DLList<Card>();
         cardInPlay = null; cardSelected = null;
         playerName = null;
-        turnEnd = false;
 
         myTurn = false;
         gameStarted = false;
@@ -171,10 +170,6 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         try {
             out.println("Username" + username);
             while(true) {
-                if (turnEnd) {
-                    System.err.println("now writing..."); // this never prints since turnEnd never becomes true
-                    out.println("TurnEnded");
-                }
                 
                 String msg = in.readLine();
                 if (msg == null) {
@@ -202,7 +197,6 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             // System.out.println("Player name = " + this.playerName);
         }
     
-        System.out.println("Turn Ended? " + turnEnd);
         
     }
     private DLList<Card> transformHand(String s) {
@@ -272,6 +266,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     }
 
     public void mousePressed(MouseEvent e) {        
+        
         if(myHand.size() >= 0) { // later add: if more than 20 hand cards, client automatically disconnected
             for (int i = 0; i<myHand.size();i++) {
                 if (e.getY() > 400 && e.getY() < 550) {
@@ -307,8 +302,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         this.cardInPlay = selected;
         myHand.remove(selected);
         cardSelected = null;
-        // System.out.println("turnEnd? " + turnEnd);
-        turnEnd = true; // why not updating in connect?????????
+        
         repaint();
     }
 

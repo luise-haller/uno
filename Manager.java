@@ -47,10 +47,4 @@ public class Manager {
             threads.get(i).send(msg);
         }
     }
-    public void nextTurn() {
-        currentTurn = (currentTurn + 1) % threads.size();
-        threads.get(currentTurn).send("Your Turn");
-        broadcast("Player " + currentTurn + " turn");
-    }
-    
 }
