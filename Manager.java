@@ -1,12 +1,10 @@
 public class Manager {
     private Game game;
     private MyArrayList<ServerThread> threads;
-    private int currentTurn;
     
     public Manager() {
         threads = new MyArrayList<ServerThread>();
         game = new Game();
-        currentTurn = 0;
     }
 
     public void add(ServerThread st) {
@@ -22,7 +20,9 @@ public class Manager {
         }
         return false;
     }
-
+    public DLList<Card> getDeck() {
+        return game.getDeckPile();
+    }
     public void startGame() {
         System.out.println("Thread size = " + threads.size());
         // later fix: max of 4 players

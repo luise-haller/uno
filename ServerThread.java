@@ -40,11 +40,10 @@ public class ServerThread implements Runnable {
                 username = msg.substring(8);
                 // System.out.println("Username = " + username.toString());
                 send("Username" + username.toString());
-            } else if (msg.startsWith("TurnEnded")) {
-                System.out.println("Hiya!"); // never prints
-            }
+            } // receive update for deck from client screen
         
             manager.startGame();
+            send("DeckFromGame" + manager.getDeck());
 
             // System.out.println("test:" + manager.isFirstClient(this));
             // // Send "Your turn" message to the first client that joins

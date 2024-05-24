@@ -20,10 +20,7 @@ public class Game {
     public DLList<Card> getDeckPile() {
         return deck;
     }
-    public DLList<Card> getDrawPile() {
-        // sublist excluding the top card
-        return deck.subList(1, deck.size());
-    }
+    
     public void cardBox() { /* Makes Deck with 112 Cards */
         //Red 0 - 9
         deck.add(new Card("Red", "0"));

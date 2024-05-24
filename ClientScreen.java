@@ -26,7 +26,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     private PrintWriter out;
 
     private BufferedImage background, logo;
-    private DLList<Card> myHand;
+    private DLList<Card> myHand, deck;
     private Card cardInPlay;
     private Card cardSelected;
 
@@ -48,6 +48,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         addMouseListener(this);
 
         myHand = new DLList<Card>();
+        deck = new DLList<Card>();
         cardInPlay = null; cardSelected = null;
         playerName = null;
 
@@ -195,6 +196,10 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         } else if (msg.startsWith("Username")) {
             this.playerName = msg.substring(8);
             // System.out.println("Player name = " + this.playerName);
+        } else if (msg.startsWith("DeckFromGame")) {
+            String stringDeck = msg.substring(12);
+            deck = transformHand(stringDeck);
+            System.out.println("DECK" + deck);
         }
     
         
