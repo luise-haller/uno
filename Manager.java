@@ -20,13 +20,38 @@ public class Manager {
         }
         return false;
     }
+
+    public void regulate(boolean reversed) {
+        if(!reversed) {
+            for (int i = 0; i<threads.size();i++) {
+                //Apply isFirstClient() logic here
+            }
+        } else {
+            for (int i = threads.size()-1; i>=0;i--) {
+                //reverse the logic above when turns are reversed
+            }
+        }
+        
+    }
+
+    public Card drawCard() {
+        Card draw = game.getDeckPile().get(0);
+        game.getDeckPile().remove(0);
+        return draw;
+    }
+
+    public void updateCardInPlay(String newCard) {
+        broadcast("Top" + newCard);
+        //broadcast the new card to ALL clients
+    }
+
     public DLList<Card> getDeck() {
         return game.getDeckPile();
     }
     public void startGame() {
         System.out.println("Thread size = " + threads.size());
         // later fix: max of 4 players
-        if (threads.size() >= 2) {
+        if (threads.size() == 1) {
             // Deal hands to players
             for (int i = 0; i < threads.size(); i++) {
                 ServerThread thread = threads.get(i);
