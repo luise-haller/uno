@@ -41,9 +41,23 @@ public class ServerThread implements Runnable {
                 // System.out.println("Username = " + username.toString());
                 send("Username" + username.toString());
             } // receive update for deck from client screen
-        
+            else if(msg.equals("DrawCard")) {
+                send("CardDrawn" + manager.drawCard());
+            } 
+            //Check if msgs has like change card in play or smth like that call a manager method and broadcast to all clients
+            else if(msg.startsWith("ChangeCard")) {
+                //Test
+                System.out.println("New Card In Play = " + msg.substring(10));
+                //Actual Code:
+                //manager.updateCardInPlay(msg.subString(10));
+
+            }
+            //If message = reverse - > manager.regulate(true) vice versa manager.regulate(false);
+
+
+            
             manager.startGame();
-            send("DeckFromGame" + manager.getDeck());
+            // send("DeckFromGame" + manager.getDeck());
 
             // System.out.println("test:" + manager.isFirstClient(this));
             // // Send "Your turn" message to the first client that joins
@@ -51,10 +65,10 @@ public class ServerThread implements Runnable {
                 send("Your Turn");
             }
 
-            while (clientSocket.getInputStream() != null) { 
-                String msg2 = in.readLine();
+            // while (clientSocket.getInputStream() != null) { 
+            //     String msg2 = in.readLine();
                 
-            }
+            // }
 
             out.flush();
             out.close();
