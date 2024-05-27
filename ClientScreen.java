@@ -26,7 +26,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     private PrintWriter out;
 
     private BufferedImage background, logo;
-    private DLList<Card> myHand, deck;
+    private DLList<Card> myHand;
     private Card cardInPlay;
     private Card cardSelected;
 
@@ -48,7 +48,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         addMouseListener(this);
 
         myHand = new DLList<Card>();
-        deck = new DLList<Card>();
+        
         cardInPlay = null; cardSelected = null;
         playerName = null;
 
@@ -196,11 +196,14 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         } else if (msg.startsWith("Username")) {
             this.playerName = msg.substring(8);
             // System.out.println("Player name = " + this.playerName);
-        } else if (msg.startsWith("DeckFromGame")) {
-            String stringDeck = msg.substring(12);
-            deck = transformHand(stringDeck);
-            System.out.println("DECK" + deck);
+        } else if (msg.startsWith("CardDrawn")) {
+            myHand.add(transformCard(msg.substring(9)));
         }
+        // else if (msg.startsWith("DeckFromGame")) {
+        //     String stringDeck = msg.substring(12);
+        //     deck = transformHand(stringDeck);
+        //     System.out.println("DECK" + deck);
+        // }
     
         
     }
@@ -290,7 +293,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         }
         // If clicked on draw pile
         if (e.getX() >= 450 && e.getX() <= 550 && e.getY() >= 100 && e.getY() <= 250) {
-            
+            out.println("DrawCard");
         }
         if (cardSelected != null) {
             // System.out.println("Card Selected = " + cardSelected.toString());
@@ -305,6 +308,9 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     }
     private void playCardFromHand(Card selected) {
         this.cardInPlay = selected;
+        //Send cardInPlay to server threaad
+        System.out.println("Client Played " + cardInPlay.toString());
+        out.println("ChangeCard" + cardInPlay.toString());
         myHand.remove(selected);
         cardSelected = null;
         
