@@ -51,7 +51,7 @@ public class Manager {
     public void startGame() {
         System.out.println("Thread size = " + threads.size());
         // later fix: 4 players
-        if (threads.size() == 1) {
+        if (threads.size() == 2) {
             // Deal hands to players
             for (int i = 0; i < threads.size(); i++) {
                 ServerThread thread = threads.get(i);

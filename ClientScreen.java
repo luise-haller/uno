@@ -33,7 +33,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     private boolean myTurn, gameStarted;
     private String hostName, username, playerName;
 
-    private JButton startGameButton, submitButton;
+    private JButton startGameButton, submitButton, quit;
     private JTextField ipAddressField, usernameField;
 
     private Color Yellow = new Color(255, 225, 0);
@@ -72,6 +72,15 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         this.add(submitButton);
         submitButton.addActionListener(this);
         submitButton.setVisible(false);
+
+        quit = new JButton();
+        quit.setFont(new Font("Arial", Font.BOLD, 16));
+        quit.setHorizontalAlignment(SwingConstants.CENTER);
+        quit.setText("QUIT");
+        quit.setBounds(100, 100, 100, 50);
+        this.add(quit);
+        quit.addActionListener(this);
+        quit.setVisible(false);
 
         ipAddressField = new JTextField();
         ipAddressField.setBounds(400, 285, 100, 30);
@@ -145,18 +154,16 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             ipAddressField.setVisible(true);
             usernameField.setVisible(true);
             submitButton.setVisible(true);
-        }
-        else if (e.getSource() == submitButton) {
+        } else if (e.getSource() == submitButton) {
             this.hostName = ipAddressField.getText();
             this.username = usernameField.getText();
-            gameStarted = true;
+            this.gameStarted = true;
         }
         repaint();
     }
     public boolean getGameStarted() {
         return this.gameStarted;
     }
-
     public void connect() throws IOException {
         Scanner sc = new Scanner(System.in);
 

@@ -62,13 +62,13 @@ public class ServerThread implements Runnable {
             // // Send "Your turn" message to the first client that joins
             
 
-            // while (clientSocket.getInputStream() != null) { 
-            //     String msg2 = in.readLine();
+            while (clientSocket.getInputStream() != null) { 
+                String msg2 = in.readLine();
                 
-            // }
+            }
 
             out.flush();
-            in.close();
+            out.close();
             System.out.println(Thread.currentThread().getName() + ": connection closed.");
         } catch (IOException ex) {
             System.out.println("Error listening for a connection");
