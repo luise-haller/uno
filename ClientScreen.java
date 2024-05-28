@@ -184,6 +184,8 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             System.err.println("Couldn't get I/O for the connection");
             System.exit(1);
         }
+        
+    
        
     }
     private void processServerMessage(String msg) {
@@ -195,7 +197,6 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             this.myTurn = true;
         } else if (msg.startsWith("Username")) {
             this.playerName = msg.substring(8);
-            // System.out.println("Player name = " + this.playerName);
         } else if (msg.startsWith("CardDrawn")) {
             myHand.add(transformCard(msg.substring(9)));
         }
@@ -224,8 +225,6 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         String[] nS = s.split(" ");
         String color = nS[0];
         String value = nS[1];
-        // String nS = s.substring(1, s.length()-1);
-        // String[] array = nS.split(" ");
         Card card = new Card(color, value);
         return card;
     }

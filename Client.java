@@ -14,17 +14,29 @@ public class Client {
         frame.pack();
         frame.setVisible(true);
 
-        while (true) {
+        // boolean connected = false;
 
-            boolean gameStarted = sc.getGameStarted();
-            if (gameStarted) {
-                sc.connect();
-            }
-            try { // To avoid high CPU usage
-                Thread.sleep(1000); 
+        // while (!connected) {
+
+        //     boolean gameStarted = sc.getGameStarted();
+        //     if (gameStarted) {
+        //         sc.connect();
+        //         connected = true;
+        //     }
+        //     try { // To avoid high CPU usage
+        //         Thread.sleep(1000); 
+        //     } catch (InterruptedException e) {
+        //         e.printStackTrace();
+        //     }
+        // }
+        while(!sc.getGameStarted()) {
+            try {
+                Thread.sleep(100); // Adjust sleep interval to avoid busy waiting
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+        sc.connect();
+       
     }
 }

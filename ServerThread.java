@@ -38,14 +38,13 @@ public class ServerThread implements Runnable {
             System.out.println("Msg received from client: " + msg);
             if (msg.startsWith("Username")) {
                 username = msg.substring(8);
-                // System.out.println("Username = " + username.toString());
                 send("Username" + username.toString());
-            } // receive update for deck from client screen
-            else if(msg.equals("DrawCard")) {
-                send("CardDrawn" + manager.drawCard());
-            } 
-            //Check if msgs has like change card in play or smth like that call a manager method and broadcast to all clients
-            else if(msg.startsWith("ChangeCard")) {
+                if (manager.isFirstClient(this)) {
+                    send("Your Turn");
+                }
+            } else if(msg.equals("DrawCard")) { // receive update for deck from client screen
+                send("CardDrawn" + manager.drawCardFromDeck());
+            } else if(msg.startsWith("ChangeCard")) { //Check if msgs has like change card in play or smth like that call a manager method and broadcast to all clients
                 //Test
                 System.out.println("New Card In Play = " + msg.substring(10));
                 //Actual Code:
@@ -61,9 +60,7 @@ public class ServerThread implements Runnable {
 
             // System.out.println("test:" + manager.isFirstClient(this));
             // // Send "Your turn" message to the first client that joins
-            if (manager.isFirstClient(this)) {
-                send("Your Turn");
-            }
+            
 
             // while (clientSocket.getInputStream() != null) { 
             //     String msg2 = in.readLine();
@@ -71,7 +68,7 @@ public class ServerThread implements Runnable {
             // }
 
             out.flush();
-            out.close();
+            in.close();
             System.out.println(Thread.currentThread().getName() + ": connection closed.");
         } catch (IOException ex) {
             System.out.println("Error listening for a connection");

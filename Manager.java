@@ -10,8 +10,9 @@ public class Manager {
     public void add(ServerThread st) {
         threads.add(st);
     }
- 
-    // Hopefully checks if a given ServerThread instance is the first client
+    public void remove(ServerThread st) {
+        threads.remove(st);
+    }
     public boolean isFirstClient(ServerThread st) {
         for (int i = 0; i < threads.size(); i++) {
             if (threads.get(i) == st) {
@@ -33,8 +34,7 @@ public class Manager {
         }
         
     }
-
-    public Card drawCard() {
+    public Card drawCardFromDeck() {
         Card draw = game.getDeckPile().get(0);
         game.getDeckPile().remove(0);
         return draw;
@@ -50,7 +50,7 @@ public class Manager {
     }
     public void startGame() {
         System.out.println("Thread size = " + threads.size());
-        // later fix: max of 4 players
+        // later fix: 4 players
         if (threads.size() == 1) {
             // Deal hands to players
             for (int i = 0; i < threads.size(); i++) {
