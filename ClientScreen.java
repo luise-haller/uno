@@ -30,10 +30,10 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     private Card cardInPlay;
     private Card cardSelected;
 
-    private boolean myTurn, gameStarted;
+    private boolean myTurn, gameStarted, displayRules;
     private String hostName, username, playerName;
 
-    private JButton startGameButton, submitButton, quit;
+    private JButton startGameButton, submitButton, rulesButton, doneButton;
     private JTextField ipAddressField, usernameField;
 
     private Color Yellow = new Color(255, 225, 0);
@@ -54,6 +54,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
 
         myTurn = false;
         gameStarted = false;
+        displayRules = false;
 
         startGameButton = new JButton();
         startGameButton.setFont(new Font("Arial", Font.BOLD, 16));
@@ -73,14 +74,23 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         submitButton.addActionListener(this);
         submitButton.setVisible(false);
 
-        quit = new JButton();
-        quit.setFont(new Font("Arial", Font.BOLD, 16));
-        quit.setHorizontalAlignment(SwingConstants.CENTER);
-        quit.setText("QUIT");
-        quit.setBounds(100, 100, 100, 50);
-        this.add(quit);
-        quit.addActionListener(this);
-        quit.setVisible(false);
+        rulesButton = new JButton();
+        rulesButton.setFont(new Font("Arial", Font.BOLD, 16));
+        rulesButton.setHorizontalAlignment(SwingConstants.CENTER);
+        rulesButton.setText("Rules");
+        rulesButton.setBounds(10, 540, 100, 50); 
+        this.add(rulesButton);
+        rulesButton.addActionListener(this);
+        rulesButton.setVisible(true);
+
+        doneButton = new JButton(); 
+        doneButton.setFont(new Font("Arial", Font.BOLD, 16));
+        doneButton.setHorizontalAlignment(SwingConstants.CENTER);
+        doneButton.setText("Done");
+        doneButton.setBounds(350, 500, 100, 50);
+        this.add(doneButton);
+        doneButton.addActionListener(this);
+        doneButton.setVisible(false); 
 
         ipAddressField = new JTextField();
         ipAddressField.setBounds(400, 285, 100, 30);
@@ -138,16 +148,47 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         
         } else {
             if (!startGameButton.isVisible()) {
+                g.setColor(Color.WHITE);
                 g.drawString("IP address of server:", 220, 300);
-                g.drawString("Your Player Name ", 220, 350);
+                g.drawString("Your Player Name: ", 220, 350);
             } else {
                 int scaledWidth = (int) (logo.getWidth() * 0.2); 
                 int scaledHeight = (int) (logo.getHeight() * 0.2);
                 g.drawImage(logo, 270, 100, scaledWidth, scaledHeight, null);
             }
         }
+        if (displayRules) {
+            drawRulebook(g);
+            doneButton.setVisible(true);
+            startGameButton.setVisible(false);
+            
+        }
     }
+    private void drawRulebook(Graphics g) {
+        g.setColor(new Color(34, 82, 52));
+        g.fillRect(50, 50, 700, 500);
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Arial", Font.BOLD, 24));
+        g.drawString("Rulebook", 350, 100);
 
+        String[] rules = {
+            "1. Each player is dealt 7 cards.",
+            "2. The top card of the deck is placed face up to start the discard pile.",
+            "3. Players take turns matching a card from their hand with the current card.",
+            "4. Cards can be matched by number, color, or symbol.",
+            "5. Special cards can change the flow of the game.",
+            "6. If a player cannot match a card, they must draw a card from the deck.",
+            "7. The first player to get rid of all their cards wins."
+        };
+
+        g.setFont(new Font("Arial", Font.PLAIN, 18));
+        int yPosition = 150;
+        for (String rule : rules) {
+            g.drawString(rule, 100, yPosition);
+            yPosition += 30;
+        }
+    }
+    
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == startGameButton) {
             startGameButton.setVisible(false);
@@ -158,6 +199,11 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             this.hostName = ipAddressField.getText();
             this.username = usernameField.getText();
             this.gameStarted = true;
+        } else if (e.getSource() == rulesButton) {
+            this.displayRules = true;
+        } else if (e.getSource() == doneButton) {
+            this.displayRules = false;
+            doneButton.setVisible(false);
         }
         repaint();
     }
@@ -212,9 +258,8 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         //     deck = transformHand(stringDeck);
         //     System.out.println("DECK" + deck);
         // }
-    
-        
     }
+
     private DLList<Card> transformHand(String s) {
         System.out.println(s);
         String[] array = s.split(",");
@@ -296,10 +341,16 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
                     }
                 }
             }
+        } 
+        if (myHand.size() > 20) { // test this out
+            System.out.println("You have more than 20 cards! You are being kicked out of the game.");
+            return;
         }
         // If clicked on draw pile
         if (e.getX() >= 450 && e.getX() <= 550 && e.getY() >= 100 && e.getY() <= 250) {
+            System.out.println("Clicked on draw pile.");
             out.println("DrawCard");
+            System.out.println("Message DrawCard sent to server");
         }
         if (cardSelected != null) {
             // System.out.println("Card Selected = " + cardSelected.toString());

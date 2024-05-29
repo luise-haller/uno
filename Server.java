@@ -14,8 +14,7 @@ public class Server {
 
 			//Wait for a connection.
 			Socket clientSocket = serverSocket.accept();
-			System.out.println("clientsocket in server:" + clientSocket);
-
+	
 			//Once a connection is made, run the socket in a ServerThread.
 			//Thread thread = new Thread(new ServerThread(clientSocket, manager));
 			ServerThread serverThread = new ServerThread(clientSocket, manager);
