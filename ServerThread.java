@@ -8,7 +8,9 @@ public class ServerThread implements Runnable {
     private Socket clientSocket;
     private Manager manager;
     private PrintWriter out;
+    private BufferedReader in;
     private String username;
+    private boolean receivedUsername;
 
 
     public ServerThread(Socket clientSocket, Manager manager) {
@@ -16,6 +18,7 @@ public class ServerThread implements Runnable {
         this.manager = manager;
         out = null;
         username = "";
+        receivedUsername = false;
     }
     
     public void send(String message) {
@@ -28,48 +31,45 @@ public class ServerThread implements Runnable {
 
     public void run() {
         System.out.println(Thread.currentThread().getName() + ": connection opened.");
-        
-
+    
+        String msg = "";
         try {
             out = new PrintWriter(clientSocket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        
-            String msg = in.readLine();
-            System.out.println("Msg received from client: " + msg);
+            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-            if (msg.startsWith("Username")) {
-                username = msg.substring(8);
-                send("Username" + username.toString());
-            } else if(msg.equals("DrawCard")) { // receive update for deck from client screen
-                send("CardDrawn" + manager.drawCardFromDeck());
-            } else if(msg.startsWith("ChangeCard")) { //Check if msgs has like change card in play or smth like that call a manager method and broadcast to all clients
-                //Test
-                System.out.println("New Card In Play = " + msg.substring(10));
-                //Actual Code:
-                //manager.updateCardInPlay(msg.subString(10));
-
-            }
-            //If message = reverse - > manager.regulate(true) vice versa manager.regulate(false);
-
-            manager.startGame();
-            // send("DeckFromGame" + manager.getDeck());
-
-            // System.out.println("test:" + manager.isFirstClient(this));
-            // // Send "Your turn" message to the first client that joins
+            String userName = "";
             if (manager.isFirstClient(this)) {
                 send("Your Turn");
             }
-            while (clientSocket.getInputStream() != null) { 
-                String msg2 = in.readLine();
+            while (clientSocket.getInputStream() != null) {
+                msg = in.readLine();
+                System.out.println("Message received from client = " + msg);
+                if(!receivedUsername) {
+                    if (msg.startsWith("Username")) {
+                        userName = msg.substring(8);
+                        receivedUsername = true;
+                    }
+                }
+                processClientMessage(msg);
+                
                 
             }
 
-            out.flush();
-            out.close();
-            System.out.println(Thread.currentThread().getName() + ": connection closed.");
         } catch (IOException ex) {
             System.out.println("Error listening for a connection");
             System.out.println(ex.getMessage());
+        }
+    }
+
+
+    private void processClientMessage(String msg) {
+        if(msg.equals("play")) {
+            manager.startGame();
+        } else if(msg.equals("ClientWent")) {
+            // System.out.println("Next Turn");
+            
+        } else if(msg.equals("DrawCard")) {
+            send("FromDraw" + manager.drawCardFromDeck().toString());
         }
     }
     
