@@ -10,6 +10,7 @@ public class ServerThread implements Runnable {
     private PrintWriter out;
     private BufferedReader in;
     private String username;
+    private int id = -1;
     private boolean receivedUsername;
 
 
@@ -19,6 +20,7 @@ public class ServerThread implements Runnable {
         out = null;
         username = "";
         receivedUsername = false;
+        
     }
     
     public void send(String message) {
@@ -29,6 +31,11 @@ public class ServerThread implements Runnable {
 		return username;
 	}
 
+    public void setID(int id) {
+        this.id = id;
+    }
+    
+
     public void run() {
         System.out.println(Thread.currentThread().getName() + ": connection opened.");
     
@@ -38,6 +45,7 @@ public class ServerThread implements Runnable {
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
             String userName = "";
+            send("ID" + id);
             if (manager.isFirstClient(this)) {
                 send("Your Turn");
             }
@@ -57,7 +65,7 @@ public class ServerThread implements Runnable {
 
         } catch (IOException ex) {
             System.out.println("Error listening for a connection");
-            System.out.println(ex.getMessage());
+            System.out.println(ex.getMessage());    
         }
     }
 
@@ -65,11 +73,15 @@ public class ServerThread implements Runnable {
     private void processClientMessage(String msg) {
         if(msg.equals("play")) {
             manager.startGame();
-        } else if(msg.equals("ClientWent")) {
+        } else if(msg.startsWith("Done")) {
             // System.out.println("Next Turn");
-            
+            int clientThatJustWent = Integer.parseInt(msg.substring(4));
+            System.out.println("ClientThatJustWent: " + clientThatJustWent);
+            manager.regulate(clientThatJustWent);
         } else if(msg.equals("DrawCard")) {
             send("FromDraw" + manager.drawCardFromDeck().toString());
+        } else if(msg.startsWith("Update")) {
+            manager.updateCardInPlay(msg.substring(6));
         }
     }
     

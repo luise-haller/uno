@@ -32,6 +32,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     private boolean myTurn, gameStarted, displayRules;
     private boolean userIn = false;
     private boolean stop;
+    private int threadID;
 
     private JButton startGameButton, submitButton, rulesButton, doneButton;
     private JTextField ipAddressField, usernameField;
@@ -156,7 +157,9 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
 
 
     private void processServerMessage(String msg) {
-        if (msg.substring(0, 4).equals("Hand")) { 
+        if (msg.startsWith("ID")) {
+            threadID = Integer.parseInt(msg.substring(2));
+        } else if (msg.substring(0, 4).equals("Hand")) { 
             myHand = transformHand(msg.substring(4));
         } else if (msg.substring(0, 3).equals("Top")) {
             cardInPlay = transformCard(msg.substring(3));
@@ -166,6 +169,15 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             this.playerName = msg.substring(8);
         } else if (msg.startsWith("FromDraw")) {
             myHand.add(transformCard(msg.substring(8)));
+        } else if (msg.startsWith("NextClient")) {
+            int id = Integer.parseInt(msg.substring(10));
+            if(id == this.threadID) {
+                myTurn = true;
+            } else {
+                myTurn = false;
+            }
+        } else if (msg.startsWith("Top")) {
+            cardInPlay = transformCard(msg.substring(3));
         }
     }
 
@@ -200,7 +212,9 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
                 }
             }
             if (this.playerName != null) {
+                g.setColor(Color.WHITE);
                 g.drawString("Player: " + this.playerName, 30, 30);
+                g.drawString("Thread #" + this.threadID, 30, 50);
             }
         
         } else {
@@ -251,12 +265,13 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
                 out.println("DrawCard");
             }
             if (cardSelected != null) {
-                if (this.myTurn && canPlayCard(cardSelected, cardInPlay)) {
+                if (canPlayCard(cardSelected, cardInPlay)) {
                     playCardFromHand(cardSelected);
                 }
             }
+            out.println("Update"+cardInPlay.toString());
             myTurn = false;
-            out.println("ClientWent");
+            out.println("Done" + threadID);
         }
         
     }

@@ -8,7 +8,9 @@ public class Manager {
     }
 
     public void add(ServerThread st) {
+        st.setID(threads.size());
         threads.add(st);
+                
     }
     public void remove(ServerThread st) {
         threads.remove(st);
@@ -37,7 +39,7 @@ public class Manager {
         System.out.println("startGame() has been called");
         System.out.println("Thread size = " + threads.size());
         // later fix: 4 players
-        if (threads.size() >= 1) {
+        if (threads.size() == 4) {
             // Deal hands to players
             for (int i = 0; i < threads.size(); i++) {
                 ServerThread thread = threads.get(i);
@@ -52,53 +54,18 @@ public class Manager {
         }
     }
 
-
-    // idk if what i wrote here makes sense LOL - > created new one below!
-    // public void regulate(boolean reversed) {
-    //     if(!reversed) {
-    //         for (int i = 0; i<threads.size();i++) {
-    //             if (isFirstClient(threads.get(i))) {
-    //                 threads.get(i).send("YourTurn");
-    //             } else {
-    //                 threads.get(i).send("NotYourTurn");
-    //             }
-    //         }
-    //     } else {
-    //         for (int i = threads.size()-1; i>=0;i--) {
-    //             if (isFirstClient(threads.get(i))) {
-    //                 threads.get(i).send("YourTurn");
-    //             } else {
-    //                 threads.get(i).send("NotYourTurn");
-    //             }
-    //         }
-    //     }
-        
-    // }
-
-    
-
-    public void regulate(boolean reversed) {
-        // if reversed is true - > set currentIndex to last index
-        // if reversed is false - > set currentIndex to 0 (first index)
-        int currentIndex = reversed ? threads.size() - 1 : 0;
-        // if reversed - > step is -1
-        // if not reversed - > step is 1
-        int step = reversed ? -1 : 1;
-
-        // for each thread, check if index matches currentIndex
-        // if it matches - > send turn msg (otherwise send not turn msg)
-        for (int i = 0; i < threads.size(); i++) {
-            if (i == currentIndex) {
-                threads.get(i).send("YourTurn");
-            } else {
-                threads.get(i).send("NotYourTurn");
-            }
+    public void regulate(int currentIndex) {
+        int nextClient = -1;
+        if (currentIndex != 3) {
+            nextClient = currentIndex + 1;
+        } else {
+            nextClient = 0;
         }
-        // update currentIndex for the next turn
-        // add step to currentIndex (% ensures that index wraps around when it reaches end of list)
-        currentIndex = (currentIndex + step + threads.size()) % threads.size();
+        broadcast("NextClient" + nextClient);
     }
-    
+    public void reverseRegulate(int currentIndex) {
+
+    }
     //Called in ServerThread which takes and removes top card from deck and adds to one client's hand
     public Card drawCardFromDeck() {
         Card draw = game.getDeckPile().get(0);
@@ -120,4 +87,6 @@ public class Manager {
         newCards.add(c1);newCards.add(c2);
         return newCards;
     }
+     
+
 }
