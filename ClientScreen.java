@@ -198,11 +198,12 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         } else if (msg.startsWith("MustDrawTwo")) {
             twoCardsToAdd = transformHand(msg.substring(11));
             myHand.add(twoCardsToAdd.get(0)); myHand.add(twoCardsToAdd.get(1));
+            twoCardsToAdd.clear();
             iWent();
         } else if (msg.startsWith("MustDrawFour")) {
             fourCardsToAdd = transformHand(msg.substring(12));
-            System.out.println("Four Cards to add to Thread #" + threadID + " = " + fourCardsToAdd.toString());
-            myHand.add(twoCardsToAdd.get(0)); myHand.add(twoCardsToAdd.get(1)); myHand.add(twoCardsToAdd.get(2)); myHand.add(twoCardsToAdd.get(3));
+            myHand.add(fourCardsToAdd.get(0)); myHand.add(fourCardsToAdd.get(1)); myHand.add(fourCardsToAdd.get(2)); myHand.add(fourCardsToAdd.get(3));
+            fourCardsToAdd.clear();
             iWent();
         } else if(msg.equals("Skipped")) {
             skipNotification = true;
