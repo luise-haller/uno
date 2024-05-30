@@ -31,7 +31,8 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     private Card cardInPlay, cardSelected;
 
     private String hostName, username, playerName;
-    private boolean myTurn, gameStarted, displayRules, notification;
+    private boolean myTurn, gameStarted, displayRules;
+    private boolean skipNotification, reverseNotification;
     private int threadID;
 
     private JButton startGameButton, submitButton, rulesButton, doneButton;
@@ -43,6 +44,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     private Color Green = new Color(72, 255, 0);
     private Color Black = new Color(0, 0, 0);
     private DLList<Card> twoCardsToAdd;
+    private DLList<Card> fourCardsToAdd;
 
     public ClientScreen() {
         setLayout(null);
@@ -56,7 +58,11 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         gameStarted = false;
         displayRules = false;
 
+        skipNotification = false;
+        reverseNotification = false;
+
         twoCardsToAdd = new DLList<Card>();
+        fourCardsToAdd = new DLList<Card>();
         
         startGameButton = new JButton();
         startGameButton.setFont(new Font("Arial", Font.BOLD, 16));
@@ -182,7 +188,8 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             int id = Integer.parseInt(msg.substring(10));
             if(id == this.threadID) {
                 myTurn = true;
-                notification = false;
+                skipNotification = false;
+                reverseNotification = false;
             } else {
                 myTurn = false;
             }
@@ -192,9 +199,16 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             twoCardsToAdd = transformHand(msg.substring(11));
             myHand.add(twoCardsToAdd.get(0)); myHand.add(twoCardsToAdd.get(1));
             iWent();
+        } else if (msg.startsWith("MustDrawFour")) {
+            fourCardsToAdd = transformHand(msg.substring(12));
+            System.out.println("Four Cards to add to Thread #" + threadID + " = " + fourCardsToAdd.toString());
+            myHand.add(twoCardsToAdd.get(0)); myHand.add(twoCardsToAdd.get(1)); myHand.add(twoCardsToAdd.get(2)); myHand.add(twoCardsToAdd.get(3));
+            iWent();
         } else if(msg.equals("Skipped")) {
-            notification = true;
-        }
+            skipNotification = true;
+        } else if(msg.equals("OrderReversed")) {
+            reverseNotification = true;
+        } 
         repaint();
     }
 
@@ -234,8 +248,10 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
                 g.drawString("Player: " + this.playerName, 30, 30);
                 g.drawString("Thread #" + this.threadID, 30, 50);
             }
-            if (notification) {
+            if (skipNotification) {
                 g.drawString("You have been skipped!", 280, 370);
+            } if(reverseNotification) {
+                g.drawString("Order Reversed", 280, 370);
             }
         
         } else {
@@ -301,6 +317,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
                             int option = JOptionPane.showConfirmDialog(null, mes, "Draw 4 Wild Card", JOptionPane.OK_CANCEL_OPTION);
                             if (option == JOptionPane.OK_OPTION) {
                                 String color = chosenColor.getText();
+                                cardInPlay.setColor(color);
                                 out.println("DrawFourWildWasPlayed" + color);
                             }
 
@@ -314,6 +331,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
                             int option = JOptionPane.showConfirmDialog(null, mes, "Wild Card", JOptionPane.OK_CANCEL_OPTION);
                             if (option == JOptionPane.OK_OPTION) {
                                 String color = chosenColor.getText();
+                                cardInPlay.setColor(color);
                                 out.println("WildCardWasPlayed" + color);
                             }
                         }
@@ -330,6 +348,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             myTurn = false;
             iWent();
         }
+        repaint();
         
     }
     //Private Methods to Play a card from hand and replace cardInPlay
@@ -388,6 +407,8 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             g.setColor(Green);
         } else if(card.getColor().equals("Black")) {
             g.setColor(Black);
+        } else {
+            System.out.println("This color does not exist");
         }
         g.fillRect(x, y, 100, 150);
         g.setColor(Color.WHITE);
@@ -452,7 +473,8 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             "4. Cards can be matched by number, color, or symbol.",
             "5. Special cards can change the flow of the game.",
             "6. If a player cannot match a card, they must draw a card from the deck.",
-            "7. The first player to get rid of all their cards wins."
+            "7. The first player to get rid of all their cards wins.",
+            "8. You can only stay Draw Two's once."
         };
 
         g.setFont(new Font("Arial", Font.PLAIN, 18));
