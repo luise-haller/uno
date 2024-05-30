@@ -31,7 +31,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     private Card cardInPlay, cardSelected;
 
     private String hostName, username, playerName;
-    private boolean myTurn, gameStarted, displayRules, yesDrawTwo;
+    private boolean myTurn, gameStarted, displayRules, notification;
     private int threadID;
 
     private JButton startGameButton, submitButton, rulesButton, doneButton;
@@ -55,8 +55,6 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         myTurn = false;
         gameStarted = false;
         displayRules = false;
-
-        yesDrawTwo = false;
 
         twoCardsToAdd = new DLList<Card>();
         
@@ -98,6 +96,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
 
         ipAddressField = new JTextField();
         ipAddressField.setBounds(400, 285, 100, 30);
+        ipAddressField.setText("localhost");
         add(ipAddressField);
         ipAddressField.setVisible(false);
 
@@ -134,6 +133,11 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         repaint();
     }
 
+    private void iWent() {
+        out.println("Done" + threadID);
+        
+    }
+
     public void connect() throws IOException {
         int portNumber = 1024;
         Socket serverSocket = new Socket(hostName, portNumber);
@@ -145,7 +149,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             out.println("play");   //this message is sent to ServerThread in order to call manager.startGame
             while (true) {
                 msg = in.readLine();
-                System.out.println("Message from Server\n" + msg);
+                // System.out.println("Message from Server\n" + msg);
                 if(gameStarted) {
                     processServerMessage(msg); //See processServerNessage private method
                 }
@@ -178,19 +182,20 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             int id = Integer.parseInt(msg.substring(10));
             if(id == this.threadID) {
                 myTurn = true;
-                if (yesDrawTwo) {
-                    myHand.add(twoCardsToAdd.get(0)); myHand.add(twoCardsToAdd.get(1));
-                }
+                notification = false;
             } else {
                 myTurn = false;
             }
         } else if (msg.startsWith("Top")) {
             cardInPlay = transformCard(msg.substring(3));
         } else if (msg.startsWith("MustDrawTwo")) {
-            yesDrawTwo = true;
             twoCardsToAdd = transformHand(msg.substring(11));
-            
-        }   
+            myHand.add(twoCardsToAdd.get(0)); myHand.add(twoCardsToAdd.get(1));
+            iWent();
+        } else if(msg.equals("Skipped")) {
+            notification = true;
+        }
+        repaint();
     }
 
     public Dimension getPreferredSize() {
@@ -222,11 +227,15 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
                         drawCard(g, myHand.get(i), 100 + i*55, 400);
                     }
                 }
+                
             }
             if (this.playerName != null) {
                 g.setColor(Color.WHITE);
                 g.drawString("Player: " + this.playerName, 30, 30);
                 g.drawString("Thread #" + this.threadID, 30, 50);
+            }
+            if (notification) {
+                g.drawString("You have been skipped!", 280, 370);
             }
         
         } else {
@@ -319,7 +328,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             }
             out.println("Update"+cardInPlay.toString());
             myTurn = false;
-            out.println("Done" + threadID);
+            iWent();
         }
         
     }
