@@ -1,10 +1,14 @@
 public class Manager {
     private Game game;
     private MyArrayList<ServerThread> threads;
+    private boolean nextClientDraw2, skipNextClient;
     
     public Manager() {
         threads = new MyArrayList<ServerThread>();
         game = new Game();
+        nextClientDraw2 = false;
+        skipNextClient = false;
+        
     }
 
     public void add(ServerThread st) {
@@ -61,6 +65,19 @@ public class Manager {
         } else {
             nextClient = 0;
         }
+        if(nextClientDraw2) {
+            threads.get(nextClient).send("MustDrawTwo" + draw2().toString());
+            nextClientDraw2 = false;
+        } else if (skipNextClient) {
+            threads.get(nextClient).send("Skipped");
+            if(nextClient!=3) {
+                nextClient+=1;
+            } else {
+                nextClient = 0;
+            }
+            skipNextClient = false;
+            // System.out.println("Next Client after Skip is Thread#" + nextClient);
+        }
         broadcast("NextClient" + nextClient);
     }
     public void reverseRegulate(int currentIndex) {
@@ -69,6 +86,10 @@ public class Manager {
             nextClient = currentIndex - 1;
         } else {
             nextClient = 3;
+        }
+        if(nextClientDraw2) {
+            threads.get(nextClient).send("MustDrawTwo");
+            nextClientDraw2 = false;
         }
         broadcast("NextClientReverse" + nextClient);
     }
@@ -102,6 +123,14 @@ public class Manager {
         game.getDeckPile().remove(0);game.getDeckPile().remove(1);game.getDeckPile().remove(2);game.getDeckPile().remove(3);
         newCards.add(c1); newCards.add(c2); newCards.add(c3); newCards.add(c4);
         return newCards;
+    }
+
+    public void clientDraw2(boolean b) {
+        this.nextClientDraw2 = b;
+    }
+
+    public void skipNextClient(boolean b) {
+        this.skipNextClient = b;
     }
 
 }
