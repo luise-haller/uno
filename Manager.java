@@ -64,7 +64,13 @@ public class Manager {
         broadcast("NextClient" + nextClient);
     }
     public void reverseRegulate(int currentIndex) {
-
+        int nextClient = 4;
+        if (currentIndex != 0) {
+            nextClient = currentIndex - 1;
+        } else {
+            nextClient = 3;
+        }
+        broadcast("NextClientReverse" + nextClient);
     }
     //Called in ServerThread which takes and removes top card from deck and adds to one client's hand
     public Card drawCardFromDeck() {
@@ -87,6 +93,15 @@ public class Manager {
         newCards.add(c1);newCards.add(c2);
         return newCards;
     }
-     
+    public DLList<Card> draw4() {
+        DLList<Card> newCards = new DLList<Card>();
+        Card c1 = game.getDeckPile().get(0);
+        Card c2 = game.getDeckPile().get(1);
+        Card c3 = game.getDeckPile().get(2);
+        Card c4 = game.getDeckPile().get(3);
+        game.getDeckPile().remove(0);game.getDeckPile().remove(1);game.getDeckPile().remove(2);game.getDeckPile().remove(3);
+        newCards.add(c1); newCards.add(c2); newCards.add(c3); newCards.add(c4);
+        return newCards;
+    }
 
 }

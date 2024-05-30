@@ -74,7 +74,6 @@ public class ServerThread implements Runnable {
         if(msg.equals("play")) {
             manager.startGame();
         } else if(msg.startsWith("Done")) {
-            // System.out.println("Next Turn");
             int clientThatJustWent = Integer.parseInt(msg.substring(4));
             System.out.println("ClientThatJustWent: " + clientThatJustWent);
             manager.regulate(clientThatJustWent);
@@ -82,6 +81,23 @@ public class ServerThread implements Runnable {
             send("FromDraw" + manager.drawCardFromDeck().toString());
         } else if(msg.startsWith("Update")) {
             manager.updateCardInPlay(msg.substring(6));
+        } else if (msg.equals("ReverseCardWasPlayed")) {
+            System.out.println("ReverseCardWasPlayed");
+            // manager.reverseRegulate(clientThatJustWent);
+        } else if (msg.equals("SkipCardWasPlayed")) {
+            System.out.println("SkipCardWasPlayed");
+
+        } else if (msg.equals("DrawTwoCardWasPlayed")) {
+            System.out.println("DrawTwoCardWasPlayed");
+            // sends over top 2 deck cards to client so that those can be added to their myHand
+            // only send this over for the next client after (DON'T send this over to current client that played the card!)
+            send("MustDrawTwo" + manager.draw2());
+        } else if (msg.startsWith("DrawFourWildWasPlayed")) {
+            System.out.println("DrawFourWildWasPlayed");
+
+        } else if (msg.startsWith("WildCardWasPlayed")) {
+            System.out.println("WildCardWasPlayed");
+
         }
     }
     

@@ -13,6 +13,8 @@ import java.util.Scanner;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
+
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 
@@ -29,9 +31,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     private Card cardInPlay, cardSelected;
 
     private String hostName, username, playerName;
-    private boolean myTurn, gameStarted, displayRules;
-    private boolean userIn = false;
-    private boolean stop;
+    private boolean myTurn, gameStarted, displayRules, yesDrawTwo;
     private int threadID;
 
     private JButton startGameButton, submitButton, rulesButton, doneButton;
@@ -42,6 +42,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     private Color Red = new Color(255, 4, 0);
     private Color Green = new Color(72, 255, 0);
     private Color Black = new Color(0, 0, 0);
+    private DLList<Card> twoCardsToAdd;
 
     public ClientScreen() {
         setLayout(null);
@@ -55,6 +56,10 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         gameStarted = false;
         displayRules = false;
 
+        yesDrawTwo = false;
+
+        twoCardsToAdd = new DLList<Card>();
+        
         startGameButton = new JButton();
         startGameButton.setFont(new Font("Arial", Font.BOLD, 16));
         startGameButton.setHorizontalAlignment(SwingConstants.CENTER);
@@ -173,12 +178,19 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             int id = Integer.parseInt(msg.substring(10));
             if(id == this.threadID) {
                 myTurn = true;
+                if (yesDrawTwo) {
+                    myHand.add(twoCardsToAdd.get(0)); myHand.add(twoCardsToAdd.get(1));
+                }
             } else {
                 myTurn = false;
             }
         } else if (msg.startsWith("Top")) {
             cardInPlay = transformCard(msg.substring(3));
-        }
+        } else if (msg.startsWith("MustDrawTwo")) {
+            yesDrawTwo = true;
+            twoCardsToAdd = transformHand(msg.substring(11));
+            
+        }   
     }
 
     public Dimension getPreferredSize() {
@@ -238,7 +250,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
 
     public void mousePressed(MouseEvent e) {        
         if (myTurn) {
-            if(myHand.size() >= 0) { // later add: if more than 20 hand cards, client automatically disconnected
+            if(myHand.size() >= 0 && myHand.size() < 20) { // later add: if more than 20 hand cards, client automatically disconnected
                 for (int i = 0; i<myHand.size();i++) {
                     if (e.getY() > 400 && e.getY() < 550) {
                         int last = myHand.size()-1;
@@ -255,8 +267,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
                         }
                     }
                 }
-            } 
-            if (myHand.size() > 20) { // test this out
+            } else {
                 System.out.println("You have more than 20 cards! You are being kicked out of the game.");
                 return;
             }
@@ -266,7 +277,44 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             }
             if (cardSelected != null) {
                 if (canPlayCard(cardSelected, cardInPlay)) {
-                    playCardFromHand(cardSelected);
+                    playCardFromHand(cardSelected); // Plays the card
+
+                    // All the different fancy card effects of being played are handeled below
+                    // Remember: Now cardSelected = cardInPlay!!
+                    if (cardInPlay.getColor().equals("Black")) {
+                        if (cardInPlay.getValue().equals("DrawFourWild")) {
+                            // pop up field for client to enter chosen color
+                            // msg that this card was played PLUS chosen color gets send to serverThread
+                            JTextField chosenColor = new JTextField();
+                            Object[] mes = {
+                                "What Color Do You Choose?", chosenColor
+                            };
+                            int option = JOptionPane.showConfirmDialog(null, mes, "Draw 4 Wild Card", JOptionPane.OK_CANCEL_OPTION);
+                            if (option == JOptionPane.OK_OPTION) {
+                                String color = chosenColor.getText();
+                                out.println("DrawFourWildWasPlayed" + color);
+                            }
+
+                        } else if (cardInPlay.getValue().equals("WildCard")) {
+                            // pop up field for client to enter chosen color
+                            // msg that this card was played PLUS chosen color gets send to serverThread
+                            JTextField chosenColor = new JTextField();
+                            Object[] mes = {
+                                "What Color Do You Choose?", chosenColor
+                            };
+                            int option = JOptionPane.showConfirmDialog(null, mes, "Wild Card", JOptionPane.OK_CANCEL_OPTION);
+                            if (option == JOptionPane.OK_OPTION) {
+                                String color = chosenColor.getText();
+                                out.println("WildCardWasPlayed" + color);
+                            }
+                        }
+                    } else if (cardInPlay.getValue().equals("Reverse")) {
+                        out.println("ReverseCardWasPlayed");
+                    } else if (cardInPlay.getValue().equals("Skip")) {
+                        out.println("SkipCardWasPlayed");
+                    } else if (cardInPlay.getValue().equals("DrawTwo")) {
+                        out.println("DrawTwoCardWasPlayed");
+                    } 
                 }
             }
             out.println("Update"+cardInPlay.toString());
@@ -277,7 +325,30 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     }
     //Private Methods to Play a card from hand and replace cardInPlay
     private boolean canPlayCard(Card selected, Card inPlay) {
-        return selected.getColor().equals(inPlay.getColor()) || selected.getValue().equals(inPlay.getValue());
+        boolean canPlay = false;
+        if (!selected.getColor().equals("Black") // if NOT a wild card OR reverse/skip/draw2 value 
+        && !selected.getValue().equals("Reverse") 
+        && !selected.getValue().equals("Skip") 
+        && !selected.getValue().equals("DrawTwo") ) { 
+            System.out.println("Regular Card");
+            canPlay = selected.getColor().equals(inPlay.getColor()) || selected.getValue().equals(inPlay.getValue());
+        } else if (selected.getColor().equals("Black")) { // if a wild card - > can always place this on cardInPlay!
+            System.out.println("Black Card");
+            canPlay = true;
+        } else if (selected.getValue().equals("Reverse")) { 
+            System.out.println("Reverse Card");
+            // Reverse can be played on matching color or on another Reverse card
+            canPlay = selected.getColor().equals(inPlay.getColor()) || inPlay.getValue().equals("Reverse");
+        } else if (selected.getValue().equals("Skip")) { 
+            System.out.println("Skip Card");
+            // Skip can be played on matching color or on another Skip Card
+            canPlay = selected.getColor().equals(inPlay.getColor()) || inPlay.getValue().equals("Skip");
+        } else if (selected.getValue().equals("DrawTwo")) {
+            System.out.println("Draw 2 Card");
+            // Draw 2 can be played on matching color or on another Draw 2 Card
+            canPlay = selected.getColor().equals(inPlay.getColor()) || inPlay.getValue().equals("DrawTwo");
+        }
+        return canPlay;
     }
     private void playCardFromHand(Card selected) {
         this.cardInPlay = selected;
