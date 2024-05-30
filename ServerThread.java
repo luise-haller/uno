@@ -82,19 +82,27 @@ public class ServerThread implements Runnable {
         } else if(msg.startsWith("Update")) {
             manager.updateCardInPlay(msg.substring(6));
         } else if (msg.equals("ReverseCardWasPlayed")) {
-            System.out.println("ReverseCardWasPlayed");
-            // manager.reverseRegulate(clientThatJustWent);
+            if(!manager.isReversed()) {
+                manager.reverseOrder(true);
+            } else {
+                manager.reverseOrder(false);
+            }
+            manager.broadcast("OrderReversed");
         } else if (msg.equals("SkipCardWasPlayed")) {
             // System.out.println("SkipCardWasPlayed");
             manager.skipNextClient(true);
         } else if (msg.equals("DrawTwoCardWasPlayed")) {
-            System.out.println("DrawTwoCardWasPlayed");
+            // System.out.println("DrawTwoCardWasPlayed");
             manager.clientDraw2(true);
         } else if (msg.startsWith("DrawFourWildWasPlayed")) {
             System.out.println("DrawFourWildWasPlayed");
-
+            String color = msg.substring(21);
+            System.out.println("Color: " + color);
+            manager.clientDraw4(true);
         } else if (msg.startsWith("WildCardWasPlayed")) {
             System.out.println("WildCardWasPlayed");
+            String color = msg.substring(17);
+            System.out.println("Color: " + color);
 
         }
     }
