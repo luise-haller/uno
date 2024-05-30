@@ -51,7 +51,7 @@ public class ServerThread implements Runnable {
             }
             while (clientSocket.getInputStream() != null) {
                 msg = in.readLine();
-                System.out.println("Message received from client = " + msg);
+                // System.out.println("Message received from client = " + msg);
                 if(!receivedUsername) {
                     if (msg.startsWith("Username")) {
                         userName = msg.substring(8);
@@ -85,13 +85,11 @@ public class ServerThread implements Runnable {
             System.out.println("ReverseCardWasPlayed");
             // manager.reverseRegulate(clientThatJustWent);
         } else if (msg.equals("SkipCardWasPlayed")) {
-            System.out.println("SkipCardWasPlayed");
-
+            // System.out.println("SkipCardWasPlayed");
+            manager.skipNextClient(true);
         } else if (msg.equals("DrawTwoCardWasPlayed")) {
             System.out.println("DrawTwoCardWasPlayed");
-            // sends over top 2 deck cards to client so that those can be added to their myHand
-            // only send this over for the next client after (DON'T send this over to current client that played the card!)
-            send("MustDrawTwo" + manager.draw2());
+            manager.clientDraw2(true);
         } else if (msg.startsWith("DrawFourWildWasPlayed")) {
             System.out.println("DrawFourWildWasPlayed");
 
