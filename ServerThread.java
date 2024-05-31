@@ -103,7 +103,12 @@ public class ServerThread implements Runnable {
             System.out.println("WildCardWasPlayed");
             String color = msg.substring(17);
             System.out.println("Color: " + color);
-
+        } else if (msg.startsWith("OneCardWarning")) {
+            System.out.println("Player " + msg.substring(14) + " has 1 card left");
+            manager.broadcast("GlobalOneCardWarning" + msg.substring(14));
+        } else if (msg.startsWith("WonWarning")) {
+            System.out.println("Player " + msg.substring(10) + " won"); // no cards remaining
+            manager.broadcast("WonAnnouncement" + msg.substring(10));
         }
     }
     

@@ -45,7 +45,7 @@ public class Manager {
         System.out.println("startGame() has been called");
         System.out.println("Thread size = " + threads.size());
         // later fix: 4 players
-        if (threads.size() == 4) {
+        if (threads.size() == 1) {
             // Deal hands to players
             for (int i = 0; i < threads.size(); i++) {
                 ServerThread thread = threads.get(i);
@@ -55,6 +55,7 @@ public class Manager {
             DLList<Card> deck = game.getDeckPile();
             Card topCard = deck.get(0);
             broadcast("Top" + topCard.toString());
+            broadcast("CardsWereDealt");
         } else {
             System.out.println("Game requires 3 to 4 players to start.");
         }
@@ -93,7 +94,7 @@ public class Manager {
                 nextClient = 3;
             }
             if(nextClientDraw2) { //Draw 2
-                threads.get(nextClient).send("MustDrawTwo");
+                threads.get(nextClient).send("MustDrawTwo" + draw2().toString());
                 nextClientDraw2 = false;
             } else if (skipNextClient) { //Skip
                 threads.get(nextClient).send("Skipped");

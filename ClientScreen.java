@@ -22,6 +22,10 @@ import java.io.*;
 import java.net.*;
 import java.awt.*;
 
+import java.net.URL;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+
 public class ClientScreen extends JPanel implements ActionListener, MouseListener {
     private PrintWriter out;
     private BufferedReader in;
@@ -30,13 +34,16 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     private DLList<Card> myHand;
     private Card cardInPlay, cardSelected;
 
-    private String hostName, username, playerName;
-    private boolean myTurn, gameStarted, displayRules;
-    private boolean skipNotification, reverseNotification;
+    private String hostName, username, playerName, playerNameOneCard, playerNameWon;
+    private boolean myTurn, gameStarted, displayRules, connectionScreenShown, endGameScreenShown;
+    private boolean skipNotification, reverseNotification, oneCardNotification, wonAnnouncement;
+    private boolean startCheckingForUnoOrDoubleUno;
     private int threadID;
+    private boolean thisClientWon;
 
-    private JButton startGameButton, submitButton, rulesButton, doneButton;
+    private JButton startGameButton, submitButton, rulesButton, doneButton, restartButton;
     private JTextField ipAddressField, usernameField;
+
 
     private Color Yellow = new Color(255, 225, 0);
     private Color Blue = new Color(0, 76, 255);
@@ -57,9 +64,15 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         myTurn = false;
         gameStarted = false;
         displayRules = false;
+        endGameScreenShown = false;
+        thisClientWon = false;
 
         skipNotification = false;
         reverseNotification = false;
+        oneCardNotification = false;
+        wonAnnouncement = false;
+        connectionScreenShown = true;
+        startCheckingForUnoOrDoubleUno = false;
 
         twoCardsToAdd = new DLList<Card>();
         fourCardsToAdd = new DLList<Card>();
@@ -72,6 +85,15 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         this.add(startGameButton);
         startGameButton.addActionListener(this);
         startGameButton.setVisible(true);
+
+        restartButton = new JButton();
+        restartButton.setFont(new Font("Arial", Font.BOLD, 16));
+        restartButton.setHorizontalAlignment(SwingConstants.CENTER);
+        restartButton.setText("Restart");
+        restartButton.setBounds(320, 450, 100, 50);
+        this.add(restartButton);
+        restartButton.addActionListener(this);
+        restartButton.setVisible(false);
 
         submitButton = new JButton();
         submitButton.setFont(new Font("Arial", Font.BOLD, 16));
@@ -135,6 +157,28 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         } else if (e.getSource() == doneButton) {
             this.displayRules = false;
             doneButton.setVisible(false);
+        } else if (e.getSource() == restartButton) {
+            restartButton.setVisible(false);
+            cardInPlay = null; cardSelected = null; 
+            myTurn = false;
+            gameStarted = true;
+            displayRules = false;
+            endGameScreenShown = false;
+
+            skipNotification = false;
+            reverseNotification = false;
+            oneCardNotification = false;
+            wonAnnouncement = false;
+            connectionScreenShown = false; // connecting screen is only shown before the first round
+            startCheckingForUnoOrDoubleUno = false;
+            thisClientWon = false;
+
+            // Clear myHand
+            for (int i = 0; i < myHand.size(); i++) {
+                myHand.remove(i);
+            }
+            out.println(username);
+            out.println("play");
         }
         repaint();
     }
@@ -153,11 +197,22 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         try {
             out.println(username);   //sends username to ServerThread
             out.println("play");   //this message is sent to ServerThread in order to call manager.startGame
+            connectionScreenShown = false;
             while (true) {
                 msg = in.readLine();
                 // System.out.println("Message from Server\n" + msg);
                 if(gameStarted) {
+                    
                     processServerMessage(msg); //See processServerNessage private method
+                    if (startCheckingForUnoOrDoubleUno) {
+                        if (myHand.size() == 1) { 
+                            out.println("OneCardWarning" + this.playerName);
+                        } else if (myHand.size() == 0) {
+                            System.out.println("This player won!");
+                            out.println("WonWarning" + this.playerName);
+                            thisClientWon = true;
+                        }
+                    }
                 }
                 repaint();
             }
@@ -190,6 +245,8 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
                 myTurn = true;
                 skipNotification = false;
                 reverseNotification = false;
+                oneCardNotification = false;
+                wonAnnouncement = false;
             } else {
                 myTurn = false;
             }
@@ -202,14 +259,32 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             iWent();
         } else if (msg.startsWith("MustDrawFour")) {
             fourCardsToAdd = transformHand(msg.substring(12));
-            myHand.add(fourCardsToAdd.get(0)); myHand.add(fourCardsToAdd.get(1)); myHand.add(fourCardsToAdd.get(2)); myHand.add(fourCardsToAdd.get(3));
+            myHand.add(fourCardsToAdd.get(0)); myHand.add(fourCardsToAdd.get(1)); 
+            myHand.add(fourCardsToAdd.get(2)); myHand.add(fourCardsToAdd.get(3));
             fourCardsToAdd.clear();
             iWent();
         } else if(msg.equals("Skipped")) {
             skipNotification = true;
+            oneCardNotification = false;
+            reverseNotification = false;
         } else if(msg.equals("OrderReversed")) {
             reverseNotification = true;
-        } 
+            skipNotification = false;
+            oneCardNotification = false;
+        } else if(msg.startsWith("GlobalOneCardWarning")) {
+            playerNameOneCard = msg.substring(20);
+            oneCardNotification = true;
+            skipNotification = false;
+            reverseNotification = false;
+        } else if (msg.startsWith("WonAnnouncement")) {
+            playerNameWon = msg.substring(15);
+            wonAnnouncement = true;
+            oneCardNotification = false;
+            skipNotification = false;
+            reverseNotification = false;
+        } else if (msg.equals("CardsWereDealt")) {
+            startCheckingForUnoOrDoubleUno = true;
+        }
         repaint();
     }
 
@@ -251,11 +326,26 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             }
             if (skipNotification) {
                 g.drawString("You have been skipped!", 280, 370);
-            } if(reverseNotification) {
+            }
+            if(reverseNotification) {
                 g.drawString("Order Reversed", 280, 370);
             }
-        
-        } else {
+            if (oneCardNotification && playerNameOneCard != null) {
+                // try {
+                //     g.drawString("Player " + playerNameOneCard + " has one card left!", 280, 370);
+                //     Thread.sleep(3000); 
+                //     oneCardNotification = false;
+                // } catch (InterruptedException e) {
+                //     e.printStackTrace();
+                // }
+                
+                g.drawString("Player " + playerNameOneCard + " has one card left!", 280, 370);
+            } if (wonAnnouncement && playerNameWon != null) {
+                gameStarted = false;
+                endGameScreenShown = true;
+            }
+            
+        } else if (connectionScreenShown) {
             if (!startGameButton.isVisible()) {
                 g.setColor(Color.WHITE);
                 g.drawString("IP address of server:", 220, 300);
@@ -265,6 +355,20 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
                 int scaledHeight = (int) (logo.getHeight() * 0.2);
                 g.drawImage(logo, 270, 100, scaledWidth, scaledHeight, null);
             }
+        } else if (endGameScreenShown) { // End Screen
+            g.setColor(new Color(129, 137, 219));
+            g.fillRect(0, 0, 800, 600);
+            g.setColor(Color.BLACK);
+            g.setFont(new Font("Arial", Font.BOLD, 60));
+            g.drawString("Game Ended", 200, 200);
+            g.setFont(new Font("Arial", Font.PLAIN, 30));
+            g.drawString(playerNameWon + " won!", 300, 300);
+            restartButton.setVisible(true);
+            if (thisClientWon) { // if this client won - > play win sound
+                this.playWinningSound();
+            } else { // if this client lost - > play loosing sound
+                this.playLosingSound();
+            }
         }
         if (displayRules) {
             drawRulebook(g);
@@ -273,10 +377,29 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             
         }
     }
-
+    private void playWinningSound() {
+        try {
+            URL url = this.getClass().getClassLoader().getResource("happy-jingle-soft.wav");
+            Clip clip = AudioSystem.getClip();
+            clip.open(AudioSystem.getAudioInputStream(url));
+            clip.start();
+        } catch (Exception exc) {
+            exc.printStackTrace(System.out);
+        }
+    }
+    private void playLosingSound() {
+        try {
+            URL url = this.getClass().getClassLoader().getResource("sad-little-piano-tune.wav");
+            Clip clip = AudioSystem.getClip();
+            clip.open(AudioSystem.getAudioInputStream(url));
+            clip.start();
+        } catch (Exception exc) {
+            exc.printStackTrace(System.out);
+        }
+    }
     public void mousePressed(MouseEvent e) {        
         if (myTurn) {
-            if(myHand.size() >= 0 && myHand.size() < 20) { // later add: if more than 20 hand cards, client automatically disconnected
+            if(myHand.size() >= 0) { // later fix with 20 cards
                 for (int i = 0; i<myHand.size();i++) {
                     if (e.getY() > 400 && e.getY() < 550) {
                         int last = myHand.size()-1;
@@ -293,7 +416,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
                         }
                     }
                 }
-            } else {
+            } else if (myHand.size() > 20) {
                 System.out.println("You have more than 20 cards! You are being kicked out of the game.");
                 return;
             }
@@ -475,7 +598,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             "5. Special cards can change the flow of the game.",
             "6. If a player cannot match a card, they must draw a card from the deck.",
             "7. The first player to get rid of all their cards wins.",
-            "8. You can only stay Draw Two's once."
+            "8. You can only stack Draw Two's."
         };
 
         g.setFont(new Font("Arial", Font.PLAIN, 18));
