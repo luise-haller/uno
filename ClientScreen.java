@@ -35,6 +35,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     private Card cardInPlay, cardSelected;
 
     private String hostName, username, playerName, playerNameOneCard, playerNameWon;
+    private String currentPlayerName;
     private boolean myTurn, gameStarted, displayRules, connectionScreenShown, endGameScreenShown;
     private boolean skipNotification, reverseNotification, oneCardNotification, wonAnnouncement;
     private boolean startCheckingForUnoOrDoubleUno;
@@ -182,12 +183,9 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         }
         repaint();
     }
-
     private void iWent() {
         out.println("Done" + threadID);
-        
     }
-
     public void connect() throws IOException {
         int portNumber = 1024;
         Socket serverSocket = new Socket(hostName, portNumber);
@@ -202,7 +200,6 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
                 msg = in.readLine();
                 // System.out.println("Message from Server\n" + msg);
                 if(gameStarted) {
-                    
                     processServerMessage(msg); //See processServerNessage private method
                     if (startCheckingForUnoOrDoubleUno) {
                         if (myHand.size() == 1) { 
@@ -216,16 +213,11 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
                 }
                 repaint();
             }
-            
-            
-            
         } catch (IOException e) {
             System.err.println("Couldn't get I/O for the connection to " + hostName);
             System.exit(1);
         }
     }
-
-
     private void processServerMessage(String msg) {
         if (msg.startsWith("ID")) {
             threadID = Integer.parseInt(msg.substring(2));
@@ -243,6 +235,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             int id = Integer.parseInt(msg.substring(10));
             if(id == this.threadID) {
                 myTurn = true;
+                out.println("ThisIsMyTurn" + username); // send out that it's this client's turn
                 skipNotification = false;
                 reverseNotification = false;
                 oneCardNotification = false;
@@ -284,10 +277,11 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             reverseNotification = false;
         } else if (msg.equals("CardsWereDealt")) {
             startCheckingForUnoOrDoubleUno = true;
+        } else if (msg.startsWith("CurrentPlayerName")) {
+            currentPlayerName = msg.substring(17);
         }
         repaint();
     }
-
     public Dimension getPreferredSize() {
         return new Dimension(800, 600);
     }
@@ -301,6 +295,12 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             submitButton.setVisible(false);
             ipAddressField.setVisible(false);
             usernameField.setVisible(false);
+            if (this.playerName != null && this.currentPlayerName != null) {
+                g.setColor(Color.WHITE);
+                g.drawString("Player: " + this.playerName, 30, 30);
+                g.drawString("Current Player: " + this.currentPlayerName, 30, 50);
+                //g.drawString("Thread #" + this.threadID, 30, 50);
+            }
             if (cardInPlay != null) {
                 g.setColor(Color.BLACK);
                 g.fillRect(450, 100, 100, 150);
@@ -317,12 +317,8 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
                         drawCard(g, myHand.get(i), 100 + i*55, 400);
                     }
                 }
+
                 
-            }
-            if (this.playerName != null) {
-                g.setColor(Color.WHITE);
-                g.drawString("Player: " + this.playerName, 30, 30);
-                g.drawString("Thread #" + this.threadID, 30, 50);
             }
             if (skipNotification) {
                 g.drawString("You have been skipped!", 280, 370);
@@ -379,7 +375,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     }
     private void playWinningSound() {
         try {
-            URL url = this.getClass().getClassLoader().getResource("happy-jingle-soft.wav");
+            URL url = this.getClass().getClassLoader().getResource("won.wav");
             Clip clip = AudioSystem.getClip();
             clip.open(AudioSystem.getAudioInputStream(url));
             clip.start();
@@ -389,7 +385,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     }
     private void playLosingSound() {
         try {
-            URL url = this.getClass().getClassLoader().getResource("sad-little-piano-tune.wav");
+            URL url = this.getClass().getClassLoader().getResource("lost.wav");
             Clip clip = AudioSystem.getClip();
             clip.open(AudioSystem.getAudioInputStream(url));
             clip.start();
@@ -399,7 +395,13 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     }
     public void mousePressed(MouseEvent e) {        
         if (myTurn) {
-            if(myHand.size() >= 0) { // later fix with 20 cards
+            // out.println("ThisIsMyTurn" + username); // send out that it's this client's turn
+            if(myHand.size() >= 0) {
+                if (myHand.size() > 20) {
+                    // actually kick them out of this round
+                    System.out.println("You have more than 20 cards! You are being kicked out of the game.");
+                    return;
+                }
                 for (int i = 0; i<myHand.size();i++) {
                     if (e.getY() > 400 && e.getY() < 550) {
                         int last = myHand.size()-1;
@@ -416,9 +418,6 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
                         }
                     }
                 }
-            } else if (myHand.size() > 20) {
-                System.out.println("You have more than 20 cards! You are being kicked out of the game.");
-                return;
             }
             // If clicked on draw pile
             if (e.getX() >= 450 && e.getX() <= 550 && e.getY() >= 100 && e.getY() <= 250) {

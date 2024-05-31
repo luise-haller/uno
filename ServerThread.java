@@ -89,10 +89,8 @@ public class ServerThread implements Runnable {
             }
             manager.broadcast("OrderReversed");
         } else if (msg.equals("SkipCardWasPlayed")) {
-            // System.out.println("SkipCardWasPlayed");
             manager.skipNextClient(true);
         } else if (msg.equals("DrawTwoCardWasPlayed")) {
-            // System.out.println("DrawTwoCardWasPlayed");
             manager.clientDraw2(true);
         } else if (msg.startsWith("DrawFourWildWasPlayed")) {
             System.out.println("DrawFourWildWasPlayed");
@@ -109,6 +107,9 @@ public class ServerThread implements Runnable {
         } else if (msg.startsWith("WonWarning")) {
             System.out.println("Player " + msg.substring(10) + " won"); // no cards remaining
             manager.broadcast("WonAnnouncement" + msg.substring(10));
+        } else if (msg.startsWith("ThisIsMyTurn")) {
+            String currentPlayerName = msg.substring(12);
+            manager.broadcast("CurrentPlayerName" + currentPlayerName);
         }
     }
     

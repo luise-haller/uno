@@ -1,3 +1,5 @@
+import javax.xml.validation.TypeInfoProvider;
+
 public class Manager {
     private Game game;
     private MyArrayList<ServerThread> threads;
@@ -44,8 +46,7 @@ public class Manager {
     public void startGame() {
         System.out.println("startGame() has been called");
         System.out.println("Thread size = " + threads.size());
-        // later fix: 4 players
-        if (threads.size() == 1) {
+        if (threads.size() == 4) {
             // Deal hands to players
             for (int i = 0; i < threads.size(); i++) {
                 ServerThread thread = threads.get(i);
@@ -54,6 +55,15 @@ public class Manager {
             }
             DLList<Card> deck = game.getDeckPile();
             Card topCard = deck.get(0);
+            // If top card is a fancy card - > delete it from the deck, put it as the last card for deck & draw new top card
+            if (topCard.getColor().equals("Black") 
+            || topCard.getValue().equals("Reverse") 
+            || topCard.getValue().equals("Skip")
+            || topCard.getValue().equals("DrawTwo")) {
+                deck.remove(topCard);
+                deck.set(deck.size(), topCard);
+                topCard = deck.get(0);
+            }
             broadcast("Top" + topCard.toString());
             broadcast("CardsWereDealt");
         } else {
