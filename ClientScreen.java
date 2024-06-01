@@ -39,6 +39,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     private boolean myTurn, gameStarted, displayRules, connectionScreenShown, endGameScreenShown;
     private boolean skipNotification, reverseNotification, oneCardNotification, wonAnnouncement;
     private boolean startCheckingForUnoOrDoubleUno;
+    private boolean canStack;
     private int threadID;
     private boolean thisClientWon;
 
@@ -67,6 +68,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         displayRules = false;
         endGameScreenShown = false;
         thisClientWon = false;
+        canStack = false;
 
         skipNotification = false;
         reverseNotification = false;
@@ -227,6 +229,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             cardInPlay = transformCard(msg.substring(3));
         } else if (msg.equals("Your Turn")) {
             this.myTurn = true;
+            out.println("ThisIsMyTurn" + username); 
         } else if (msg.startsWith("Username")) {
             this.playerName = msg.substring(8);
         } else if (msg.startsWith("FromDraw")) {
@@ -246,17 +249,35 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         } else if (msg.startsWith("Top")) {
             cardInPlay = transformCard(msg.substring(3));
         } else if (msg.startsWith("MustDrawTwo")) {
-            twoCardsToAdd = transformHand(msg.substring(11));
-            myHand.add(twoCardsToAdd.get(0)); myHand.add(twoCardsToAdd.get(1));
-            twoCardsToAdd.clear();
-            iWent();
+            //Client is only given 2 cards if they DO NOT have a Draw 2 in their hand
+            for (int i = 0; i< myHand.size(); i++) {
+                if(myHand.get(i).getValue().equals("DrawTwo")) {
+                    canStack = true;
+                }
+            }
+            if(!canStack) {
+                System.out.println("this shouldn't be printing");
+                twoCardsToAdd = transformHand(msg.substring(11));
+                myHand.add(twoCardsToAdd.get(0)); myHand.add(twoCardsToAdd.get(1));
+                twoCardsToAdd.clear();
+                iWent();
+            } else {
+                System.out.println("Client #" + threadID + " can stack plus 2s");
+            }
+            
         } else if (msg.startsWith("MustDrawFour")) {
             fourCardsToAdd = transformHand(msg.substring(12));
             myHand.add(fourCardsToAdd.get(0)); myHand.add(fourCardsToAdd.get(1)); 
             myHand.add(fourCardsToAdd.get(2)); myHand.add(fourCardsToAdd.get(3));
             fourCardsToAdd.clear();
             iWent();
-        } else if(msg.equals("Skipped")) {
+        } else if(msg.startsWith("2sStacked")){
+            fourCardsToAdd = transformHand(msg.substring(9));
+            System.out.println("Client #" + threadID + " has received stacked 2s");
+            myHand.add(fourCardsToAdd.get(0)); myHand.add(fourCardsToAdd.get(1)); 
+            myHand.add(fourCardsToAdd.get(2)); myHand.add(fourCardsToAdd.get(3));
+            fourCardsToAdd.clear();
+        }else if(msg.equals("Skipped")) {
             skipNotification = true;
             oneCardNotification = false;
             reverseNotification = false;
@@ -326,21 +347,16 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             if(reverseNotification) {
                 g.drawString("Order Reversed", 280, 370);
             }
+            if (canStack) {
+                g.drawString("You can only play a Draw 2 Card", 200, 370);
+            }
             if (oneCardNotification && playerNameOneCard != null) {
-                // try {
-                //     g.drawString("Player " + playerNameOneCard + " has one card left!", 280, 370);
-                //     Thread.sleep(3000); 
-                //     oneCardNotification = false;
-                // } catch (InterruptedException e) {
-                //     e.printStackTrace();
-                // }
-                
                 g.drawString("Player " + playerNameOneCard + " has one card left!", 280, 370);
             } if (wonAnnouncement && playerNameWon != null) {
                 gameStarted = false;
                 endGameScreenShown = true;
             }
-            
+            oneCardNotification = false;
         } else if (connectionScreenShown) {
             if (!startGameButton.isVisible()) {
                 g.setColor(Color.WHITE);
@@ -407,13 +423,31 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
                         int last = myHand.size()-1;
                         if (i == last) {
                             if (e.getX() >= 100 +i*55 && e.getX() < 200 + i*55) {
-                                cardSelected = myHand.get(i);
-                                
+                                if(!canStack) {
+                                    cardSelected = myHand.get(i);
+                                } else {
+                                    if(myHand.get(i).getValue().equals("DrawTwo")) {
+                                        cardSelected = myHand.get(i);
+                                        System.out.println("Sending msg to server saying stack");
+                                        //Send a message to server saying that this client is stacking
+                                        out.println("Stack");
+                                        canStack = false;
+                                    }
+                                }                                
                             }    
                         } else {
                             if (e.getX() >= 100 +i*55 && e.getX() < 155 + i*55) {
-                                cardSelected = myHand.get(i);
-                                
+                                if(!canStack) {
+                                    cardSelected = myHand.get(i);
+                                } else {
+                                    if(myHand.get(i).getValue().equals("DrawTwo")) {
+                                        cardSelected = myHand.get(i);
+                                        System.out.println("Sending msg to server saying stack");
+                                        //Send a message to server saying that this client is stacking
+                                        out.println("Stack");
+                                        canStack = false;
+                                    }
+                                }      
                             }
                         }
                     }
@@ -597,7 +631,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             "5. Special cards can change the flow of the game.",
             "6. If a player cannot match a card, they must draw a card from the deck.",
             "7. The first player to get rid of all their cards wins.",
-            "8. You can only stack Draw Two's."
+            "8. You can only stack Draw Two's once."
         };
 
         g.setFont(new Font("Arial", Font.PLAIN, 18));
@@ -608,8 +642,8 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         }
     }
     
-    public void mouseReleased(MouseEvent e) {}
-    public void mouseEntered(MouseEvent e) {}
-    public void mouseExited(MouseEvent e) {}
-    public void mouseClicked(MouseEvent e) {}
+    public void mouseReleased(MouseEvent e) {   }
+    public void mouseEntered(MouseEvent e) {   }
+    public void mouseExited(MouseEvent e) {   }
+    public void mouseClicked(MouseEvent e) {   }
 }

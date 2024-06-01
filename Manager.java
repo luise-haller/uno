@@ -1,9 +1,7 @@
-import javax.xml.validation.TypeInfoProvider;
-
 public class Manager {
     private Game game;
     private MyArrayList<ServerThread> threads;
-    private boolean nextClientDraw2, skipNextClient, reversed, nextClientDraw4;
+    private boolean nextClientDraw2, skipNextClient, reversed, nextClientDraw4, stacked;
     
     public Manager() {
         threads = new MyArrayList<ServerThread>();
@@ -12,7 +10,7 @@ public class Manager {
         nextClientDraw4 = false;
         skipNextClient = false;
         reversed = false;
-        
+        stacked = false;
     }
 
     public void add(ServerThread st) {
@@ -73,7 +71,6 @@ public class Manager {
 
     public void regulate(int currentIndex) {
         int nextClient = -1;
-        System.out.println("Is Next Client Drawing 4? " + nextClientDraw4);
         if (!reversed) { //normal order 0 -> 3
             if (currentIndex != 3) {
                 nextClient = currentIndex + 1;
@@ -82,6 +79,10 @@ public class Manager {
             }
             if(nextClientDraw2) { //Draw 2
                 threads.get(nextClient).send("MustDrawTwo" + draw2().toString());
+                if(stacked) {
+                    threads.get(nextClient).send("MustDrawTwo" + draw2().toString());
+                    stacked = false;
+                }
                 nextClientDraw2 = false;
             } else if (skipNextClient) { // Skip
                 threads.get(nextClient).send("Skipped");
@@ -105,6 +106,10 @@ public class Manager {
             }
             if(nextClientDraw2) { //Draw 2
                 threads.get(nextClient).send("MustDrawTwo" + draw2().toString());
+                if(stacked) {
+                    threads.get(nextClient).send("MustDrawTwo" + draw2().toString());
+                    stacked = false;
+                }
                 nextClientDraw2 = false;
             } else if (skipNextClient) { //Skip
                 threads.get(nextClient).send("Skipped");
@@ -117,7 +122,7 @@ public class Manager {
             } else if(nextClientDraw4) { // Draw 4
                 threads.get(nextClient).send("MustDrawFour" + draw4().toString());
                 nextClientDraw4 = false;
-            }
+            } 
         }
         broadcast("NextClient" + nextClient);
     }
@@ -175,6 +180,22 @@ public class Manager {
     public boolean isReversed() {
         return reversed;
     }
+
+    public void callStack() {
+        stacked = true;
+    }
+
+    // public DLList<Card> stack2() {
+    //     DLList<Card> newCards = new DLList<Card>();
+    //     Card c1 = game.getDeckPile().get(0);
+    //     Card c2 = game.getDeckPile().get(1);
+    //     Card c3 = game.getDeckPile().get(2);
+    //     Card c4 = game.getDeckPile().get(3);
+    //     game.getDeckPile().remove(0);game.getDeckPile().remove(0);
+    //     game.getDeckPile().remove(0);game.getDeckPile().remove(0);
+    //     newCards.add(c1); newCards.add(c2); newCards.add(c3); newCards.add(c4);
+    //     return newCards;
+    // }
 
 
 }

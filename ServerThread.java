@@ -1,3 +1,4 @@
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -110,6 +111,8 @@ public class ServerThread implements Runnable {
         } else if (msg.startsWith("ThisIsMyTurn")) {
             String currentPlayerName = msg.substring(12);
             manager.broadcast("CurrentPlayerName" + currentPlayerName);
+        } else if( msg.startsWith("Stack")) {
+            manager.callStack();
         }
     }
     
