@@ -37,7 +37,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
     private String hostName, username, playerName, playerNameOneCard, playerNameWon;
     private String currentPlayerName;
     private boolean myTurn, gameStarted, displayRules, connectionScreenShown, endGameScreenShown;
-    private boolean skipNotification, reverseNotification, oneCardNotification, wonAnnouncement;
+    private boolean skipNotification, reverseNotification, oneCardNotification, wonAnnouncement, drawNotification;
     private boolean startCheckingForUnoOrDoubleUno;
     private boolean canStack;
     private int threadID;
@@ -234,6 +234,14 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             this.playerName = msg.substring(8);
         } else if (msg.startsWith("FromDraw")) {
             myHand.add(transformCard(msg.substring(8)));
+            if(canPlayCard(myHand.get(myHand.size()-1), cardInPlay)) {
+                drawNotification = true;
+                playCardFromHand(myHand.get(myHand.size()-1));
+                actionCard();
+            } 
+            out.println("Update"+cardInPlay.toString());
+            myTurn = false;
+            iWent();
         } else if (msg.startsWith("NextClient")) {
             int id = Integer.parseInt(msg.substring(10));
             if(id == this.threadID) {
@@ -243,6 +251,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
                 reverseNotification = false;
                 oneCardNotification = false;
                 wonAnnouncement = false;
+                drawNotification = false;
             } else {
                 myTurn = false;
             }
@@ -256,7 +265,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
                 }
             }
             if(!canStack) {
-                System.out.println("this shouldn't be printing");
+                
                 twoCardsToAdd = transformHand(msg.substring(11));
                 myHand.add(twoCardsToAdd.get(0)); myHand.add(twoCardsToAdd.get(1));
                 twoCardsToAdd.clear();
@@ -350,11 +359,18 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
             if (canStack) {
                 g.drawString("You can only play a Draw 2 Card", 200, 370);
             }
+            if (drawNotification) {
+                g.drawString("Played Card from Draw Pile : " + cardInPlay.toString(), 220, 30);
+            }
             if (oneCardNotification && playerNameOneCard != null) {
                 g.drawString("Player " + playerNameOneCard + " has one card left!", 280, 370);
             } if (wonAnnouncement && playerNameWon != null) {
                 gameStarted = false;
                 endGameScreenShown = true;
+            }
+
+            if (myTurn) {
+                g.drawString("It's Your Turn!", 310, 30);
             }
             oneCardNotification = false;
         } else if (connectionScreenShown) {
@@ -463,50 +479,56 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
 
                     // All the different fancy card effects of being played are handeled below
                     // Remember: Now cardSelected = cardInPlay!!
-                    if (cardInPlay.getColor().equals("Black")) {
-                        if (cardInPlay.getValue().equals("DrawFourWild")) {
-                            // pop up field for client to enter chosen color
-                            // msg that this card was played PLUS chosen color gets send to serverThread
-                            JTextField chosenColor = new JTextField();
-                            Object[] mes = {
-                                "What Color Do You Choose?", chosenColor
-                            };
-                            int option = JOptionPane.showConfirmDialog(null, mes, "Draw 4 Wild Card", JOptionPane.OK_CANCEL_OPTION);
-                            if (option == JOptionPane.OK_OPTION) {
-                                String color = chosenColor.getText();
-                                cardInPlay.setColor(color);
-                                out.println("DrawFourWildWasPlayed" + color);
-                            }
-
-                        } else if (cardInPlay.getValue().equals("WildCard")) {
-                            // pop up field for client to enter chosen color
-                            // msg that this card was played PLUS chosen color gets send to serverThread
-                            JTextField chosenColor = new JTextField();
-                            Object[] mes = {
-                                "What Color Do You Choose?", chosenColor
-                            };
-                            int option = JOptionPane.showConfirmDialog(null, mes, "Wild Card", JOptionPane.OK_CANCEL_OPTION);
-                            if (option == JOptionPane.OK_OPTION) {
-                                String color = chosenColor.getText();
-                                cardInPlay.setColor(color);
-                                out.println("WildCardWasPlayed" + color);
-                            }
-                        }
-                    } else if (cardInPlay.getValue().equals("Reverse")) {
-                        out.println("ReverseCardWasPlayed");
-                    } else if (cardInPlay.getValue().equals("Skip")) {
-                        out.println("SkipCardWasPlayed");
-                    } else if (cardInPlay.getValue().equals("DrawTwo")) {
-                        out.println("DrawTwoCardWasPlayed");
-                    } 
+                    actionCard();
+                    
                 }
+                out.println("Update"+cardInPlay.toString());
+                myTurn = false;
+                iWent();
             }
-            out.println("Update"+cardInPlay.toString());
-            myTurn = false;
-            iWent();
+            
         }
         repaint();
         
+    }
+
+    private void actionCard() {
+        if (cardInPlay.getColor().equals("Black")) {
+            if (cardInPlay.getValue().equals("DrawFourWild")) {
+                // pop up field for client to enter chosen color
+                // msg that this card was played PLUS chosen color gets send to serverThread
+                JTextField chosenColor = new JTextField();
+                Object[] mes = {
+                    "What Color Do You Choose?", chosenColor
+                };
+                int option = JOptionPane.showConfirmDialog(null, mes, "Draw 4 Wild Card", JOptionPane.OK_CANCEL_OPTION);
+                if (option == JOptionPane.OK_OPTION) {
+                    String color = chosenColor.getText();
+                    cardInPlay.setColor(color);
+                    out.println("DrawFourWildWasPlayed" + color);
+                }
+
+            } else if (cardInPlay.getValue().equals("WildCard")) {
+                // pop up field for client to enter chosen color
+                // msg that this card was played PLUS chosen color gets send to serverThread
+                JTextField chosenColor = new JTextField();
+                Object[] mes = {
+                    "What Color Do You Choose?", chosenColor
+                };
+                int option = JOptionPane.showConfirmDialog(null, mes, "Wild Card", JOptionPane.OK_CANCEL_OPTION);
+                if (option == JOptionPane.OK_OPTION) {
+                    String color = chosenColor.getText();
+                    cardInPlay.setColor(color);
+                    out.println("WildCardWasPlayed" + color);
+                }
+            }
+        } else if (cardInPlay.getValue().equals("Reverse")) {
+            out.println("ReverseCardWasPlayed");
+        } else if (cardInPlay.getValue().equals("Skip")) {
+            out.println("SkipCardWasPlayed");
+        } else if (cardInPlay.getValue().equals("DrawTwo")) {
+            out.println("DrawTwoCardWasPlayed");
+        } 
     }
     //Private Methods to Play a card from hand and replace cardInPlay
     private boolean canPlayCard(Card selected, Card inPlay) {
@@ -536,6 +558,7 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
         return canPlay;
     }
     private void playCardFromHand(Card selected) {
+        
         this.cardInPlay = selected;
         //Send cardInPlay to server thread
         out.println("ChangeCard" + cardInPlay.toString());
