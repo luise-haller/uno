@@ -184,18 +184,4 @@ public class Manager {
     public void callStack() {
         stacked = true;
     }
-
-    // public DLList<Card> stack2() {
-    //     DLList<Card> newCards = new DLList<Card>();
-    //     Card c1 = game.getDeckPile().get(0);
-    //     Card c2 = game.getDeckPile().get(1);
-    //     Card c3 = game.getDeckPile().get(2);
-    //     Card c4 = game.getDeckPile().get(3);
-    //     game.getDeckPile().remove(0);game.getDeckPile().remove(0);
-    //     game.getDeckPile().remove(0);game.getDeckPile().remove(0);
-    //     newCards.add(c1); newCards.add(c2); newCards.add(c3); newCards.add(c4);
-    //     return newCards;
-    // }
-
-
 }
