@@ -210,6 +210,8 @@ public class ClientScreen extends JPanel implements ActionListener, MouseListene
                             System.out.println("This player won!");
                             out.println("WonWarning" + this.playerName);
                             thisClientWon = true;
+                        } else {
+                            thisClientWon = false;
                         }
                     }
                 }
